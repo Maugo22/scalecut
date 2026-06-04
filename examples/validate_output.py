@@ -56,8 +56,9 @@ for folder in expected_folders:
 print("\n[2] Admin files")
 
 admin_files = [
-    ADMIN / "checklist.csv",
-    ADMIN / "checklist.md",
+    ADMIN / "delivery_checklist.csv",
+    ADMIN / "delivery_checklist.md",
+    ADMIN / "naming_preview.md",
     ADMIN / "project_config.json",
     ROOT / "README.md",
 ]
@@ -69,10 +70,10 @@ for f in admin_files:
 
 print("\n[3] CSV integrity")
 
-EXPECTED_COLUMNS = ["Clip", "Platform", "Format", "Language", "Version", "Status", "Filename", "Notes"]
+EXPECTED_COLUMNS = ["Clip", "Platform", "Format", "Language", "Version", "Status", "Filename", "Export_Path", "Notes"]
 EXPECTED_ROWS = 48
 
-with open(ADMIN / "checklist.csv", newline="", encoding="utf-8") as f:
+with open(ADMIN / "delivery_checklist.csv", newline="", encoding="utf-8") as f:
     reader = csv.DictReader(f)
     rows = list(reader)
 
@@ -123,9 +124,9 @@ with open(ADMIN / "project_config.json", encoding="utf-8") as f:
 
 check("  Valid JSON",              True)  # would have raised above
 check("  scalecut_version present", "scalecut_version" in cfg)
-check("  deliverables_count = 48",
-      cfg.get("deliverables_count") == EXPECTED_ROWS,
-      f"got {cfg.get('deliverables_count')}")
+check("  summary.total_deliverables = 48",
+      cfg.get("summary", {}).get("total_deliverables") == EXPECTED_ROWS,
+      f"got {cfg.get('summary', {}).get('total_deliverables')}")
 check("  project.client = 'Acme Studio'",
       cfg["project"]["client"] == "Acme Studio")
 check("  project.delivery_date correct",
@@ -138,13 +139,13 @@ check("  folder_structure has 13 entries",
 
 print("\n[6] Markdown checklist")
 
-md_text = (ADMIN / "checklist.md").read_text(encoding="utf-8")
+md_text = (ADMIN / "delivery_checklist.md").read_text(encoding="utf-8")
 
 md_filenames_found = sum(1 for r in rows if r["Filename"] in md_text)
 check(f"  All {EXPECTED_ROWS} filenames present in Markdown",
       md_filenames_found == EXPECTED_ROWS,
       f"found {md_filenames_found}")
-check("  Progress section present", "## Progress" in md_text)
+check("  Progress tracker section present", "## Progress tracker" in md_text)
 
 # ── Summary ───────────────────────────────────────────────────────────────────
 

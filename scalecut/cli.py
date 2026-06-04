@@ -24,7 +24,7 @@ from scalecut.folders import create_folders
 from scalecut.checklist import write_csv, write_markdown
 from scalecut.config_gen import write_config
 from scalecut.readme_gen import write_readme
-from scalecut.preview import show_preview
+from scalecut.preview import show_preview, write_naming_preview
 from scalecut import __version__
 
 console = Console()
@@ -250,17 +250,20 @@ def scaffold(config: ProjectConfig) -> None:
 
     root = create_folders(config)
     folder_count = sum(1 for _ in root.rglob("*") if _.is_dir())
-    console.print(f"  [bold green]✓[/bold green]  Carpetas        [dim]{folder_count} directorios → {root.name}[/dim]")
+    console.print(f"  [bold green]✓[/bold green]  Carpetas               [dim]{folder_count} directorios → {root.name}[/dim]")
 
-    csv_path = write_csv(config, root)
     row_count = config.num_clips * len(config.platforms) * len(config.formats)
-    console.print(f"  [bold green]✓[/bold green]  checklist.csv   [dim]{row_count} entregables[/dim]")
+    write_csv(config, root)
+    console.print(f"  [bold green]✓[/bold green]  delivery_checklist.csv [dim]{row_count} entregables[/dim]")
 
     write_markdown(config, root)
-    console.print(f"  [bold green]✓[/bold green]  checklist.md    [dim]tabla Markdown[/dim]")
+    console.print(f"  [bold green]✓[/bold green]  delivery_checklist.md  [dim]checkboxes por clip[/dim]")
+
+    write_naming_preview(config, root)
+    console.print(f"  [bold green]✓[/bold green]  naming_preview.md      [dim]nombres por clip y plataforma[/dim]")
 
     write_config(config, root)
-    console.print(f"  [bold green]✓[/bold green]  project_config.json")
+    console.print(f"  [bold green]✓[/bold green]  project_config.json    [dim]resumen + {row_count} entregables[/dim]")
 
     write_readme(config, root)
     console.print(f"  [bold green]✓[/bold green]  README.md")
