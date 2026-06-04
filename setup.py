@@ -11,6 +11,8 @@ setup(
         "click>=8.1.0",
         "questionary>=2.0.0",
         "rich>=13.0.0",
+        "streamlit>=1.35.0",
+        "pandas>=2.0.0",
     ],
     extras_require={
         "dev": ["pytest>=8.0.0"],
