@@ -9,6 +9,11 @@ import streamlit as st
 from scalecut import __version__
 from scalecut.checklist import write_csv, write_markdown
 from scalecut.config_gen import write_config
+from scalecut.edit_plan import (
+    EditPlanClip, make_placeholder_clips,
+    write_edit_plan_csv, write_edit_plan_md, write_edit_plan_json, write_markers_csv,
+    validate_timecodes, calculate_duration, timecode_to_seconds,
+)
 from scalecut.editor_instructions import write_editor_instructions
 from scalecut.folders import build_folder_tree, create_folders
 from scalecut.models import ProjectConfig
@@ -292,6 +297,91 @@ if _can_preview:
 
     st.divider()
 
+# ── Edit Plan ─────────────────────────────────────────────────────────────────
+
+with st.expander("📝 Edit Plan  —  timestamps, goals y hooks por clip", expanded=False):
+    ep_enabled = st.toggle(
+        "Activar generación de Edit Plan",
+        value=False,
+        key="ep_enabled",
+        help="Genera edit_plan.csv / .md / .json y markers.csv con los datos de cada clip.",
+    )
+
+    if ep_enabled:
+        ep_mode = st.radio(
+            "Modo",
+            ["Placeholder (vacío)", "Manual (ingresar datos ahora)"],
+            horizontal=True,
+            key="ep_mode",
+        )
+
+        if "Placeholder" in ep_mode:
+            st.info(
+                "Se generará un edit plan vacío con todos los entregables. "
+                "Rellena los timecodes y datos creativos en `10_Admin/edit_plan.csv` "
+                "después de generar el proyecto.",
+                icon="ℹ️",
+            )
+            if platforms and formats:
+                total_ep = int(num_clips) * len(platforms) * len(formats)
+                st.caption(f"Se crearán **{total_ep} filas** — una por entregable.")
+
+        else:  # Manual mode
+            if int(num_clips) > 15:
+                st.warning(
+                    "El modo manual está optimizado para proyectos de hasta 15 clips. "
+                    "Para proyectos grandes usa el modo Placeholder y rellena el CSV después.",
+                    icon="⚠️",
+                )
+
+            st.caption(
+                "Introduce los datos de cada clip. El mismo timecode y goal se aplica "
+                "a todos los formatos de ese clip."
+            )
+
+            for clip_n in range(1, min(int(num_clips) + 1, 16)):
+                clip_id = f"Clip{clip_n:02d}"
+                with st.expander(f"📎 {clip_id}", expanded=(clip_n == 1)):
+                    mc1, mc2, mc3 = st.columns(3)
+
+                    with mc1:
+                        st.markdown("**Timecodes**")
+                        ep_start = st.text_input(
+                            "Start TC",
+                            placeholder="00:00:10:00",
+                            key=f"ep_start_{clip_id}",
+                        )
+                        ep_end = st.text_input(
+                            "End TC",
+                            placeholder="00:01:25:00",
+                            key=f"ep_end_{clip_id}",
+                        )
+                        if ep_start or ep_end:
+                            valid, err = validate_timecodes(ep_start, ep_end)
+                            if valid and ep_start and ep_end:
+                                dur = calculate_duration(ep_start, ep_end)
+                                if dur:
+                                    secs = timecode_to_seconds(dur)
+                                    st.caption(f"⏱ {dur}  (~{int(secs)}s)")
+                            elif not valid:
+                                st.error(err)
+
+                    with mc2:
+                        st.markdown("**Creatividad**")
+                        st.text_input("Goal",   placeholder="brand awareness / engagement / conversion",
+                                      key=f"ep_goal_{clip_id}")
+                        st.text_input("Hook",   placeholder="Frase de apertura (máx 15 palabras)",
+                                      key=f"ep_hook_{clip_id}")
+                        st.text_input("Título", placeholder="Título sugerido",
+                                      key=f"ep_title_{clip_id}")
+
+                    with mc3:
+                        st.markdown("**Copy**")
+                        st.text_input("CTA",   placeholder="Call to action",
+                                      key=f"ep_cta_{clip_id}")
+                        st.text_area("Notas",  placeholder="Instrucciones para el editor",
+                                     key=f"ep_notes_{clip_id}", height=130)
+
 generate = st.button("✂️ Generar proyecto", type="primary", use_container_width=True)
 
 # ── Validation & generation ───────────────────────────────────────────────────
@@ -329,12 +419,59 @@ if generate:
             write_prompts_ai(config, root)
             write_config(config, root)
             write_readme(config, root)
+
+            # Edit Plan generation
+            ep_clips = None
+            if st.session_state.get("ep_enabled", False):
+                ep_mode_val = st.session_state.get("ep_mode", "Placeholder (vacío)")
+                if "Placeholder" in ep_mode_val:
+                    ep_clips = make_placeholder_clips(config)
+                    ep_json_mode = "placeholder"
+                else:
+                    from scalecut.naming import build_filename as _bfn
+                    ep_clips = []
+                    for clip_n in range(1, config.num_clips + 1):
+                        clip_id = f"Clip{clip_n:02d}"
+                        _start = st.session_state.get(f"ep_start_{clip_id}", "")
+                        _end   = st.session_state.get(f"ep_end_{clip_id}", "")
+                        _dur   = calculate_duration(_start, _end) if _start and _end else ""
+                        _goal  = st.session_state.get(f"ep_goal_{clip_id}", "")
+                        _hook  = st.session_state.get(f"ep_hook_{clip_id}", "")
+                        _title = st.session_state.get(f"ep_title_{clip_id}", "")
+                        _cta   = st.session_state.get(f"ep_cta_{clip_id}", "")
+                        _notes = st.session_state.get(f"ep_notes_{clip_id}", "")
+                        for platform in config.platforms:
+                            for fmt in config.formats:
+                                ep_clips.append(EditPlanClip(
+                                    clip_id=clip_id,
+                                    start_timecode=_start,
+                                    end_timecode=_end,
+                                    duration=_dur or "",
+                                    platform=platform,
+                                    format=fmt,
+                                    goal=_goal,
+                                    hook=_hook,
+                                    title=_title,
+                                    caption="",
+                                    cta=_cta,
+                                    notes=_notes,
+                                    export_filename=_bfn(config, clip_n, platform, fmt),
+                                    status=config.initial_status,
+                                ))
+                    ep_json_mode = "manual"
+
+                write_edit_plan_csv(ep_clips, root)
+                write_edit_plan_md(ep_clips, root, config)
+                write_edit_plan_json(ep_clips, root, config, mode=ep_json_mode)
+                write_markers_csv(ep_clips, root)
+
             zip_bytes = create_zip(root)
 
         st.session_state["config"]       = config
         st.session_state["root"]         = root
         st.session_state["deliverables"] = generate_all_filenames(config)
         st.session_state["zip_bytes"]    = zip_bytes
+        st.session_state["ep_clips"]     = ep_clips
 
 # ── Results ───────────────────────────────────────────────────────────────────
 
@@ -384,10 +521,14 @@ if "config" in st.session_state:
 
     st.divider()
 
-    # Tabs — Naming first (P1)
-    tab_naming, tab_del, tab_folders, tab_files = st.tabs(
-        ["🏷️ Naming", "📋 Entregables", "📁 Carpetas", "📄 Más archivos"]
-    )
+    # Tabs — Naming first (P1); Edit Plan tab visible only when generated
+    ep_clips_result = st.session_state.get("ep_clips")
+    tab_labels = ["🏷️ Naming", "📋 Entregables", "📁 Carpetas", "📄 Más archivos"]
+    if ep_clips_result:
+        tab_labels.append("📝 Edit Plan")
+    tabs = st.tabs(tab_labels)
+    tab_naming, tab_del, tab_folders, tab_files = tabs[0], tabs[1], tabs[2], tabs[3]
+    tab_ep = tabs[4] if ep_clips_result else None
 
     # ── Naming ────────────────────────────────────────────────────────────────
     with tab_naming:
@@ -494,3 +635,67 @@ if "config" in st.session_state:
             use_container_width=True,
             key="dl_zip_bottom",
         )
+
+    # ── Edit Plan tab ─────────────────────────────────────────────────────────
+    if tab_ep is not None and ep_clips_result:
+        with tab_ep:
+            ep_df = pd.DataFrame([
+                {
+                    "Clip":     c.clip_id,
+                    "Start TC": c.start_timecode or "—",
+                    "End TC":   c.end_timecode   or "—",
+                    "Duración": c.duration        or "—",
+                    "Platform": c.platform,
+                    "Format":   c.format,
+                    "Goal":     c.goal   or "—",
+                    "Hook":     c.hook   or "—",
+                    "Status":   c.status,
+                    "Filename": c.export_filename,
+                }
+                for c in ep_clips_result
+            ])
+
+            efc1, efc2 = st.columns(2)
+            with efc1:
+                ef_clip = st.multiselect("Clip",       sorted(ep_df["Clip"].unique()),     key="ef_clip")
+            with efc2:
+                ef_plat = st.multiselect("Plataforma", sorted(ep_df["Platform"].unique()), key="ef_plat")
+
+            ep_filtered = ep_df.copy()
+            if ef_clip: ep_filtered = ep_filtered[ep_filtered["Clip"].isin(ef_clip)]
+            if ef_plat: ep_filtered = ep_filtered[ep_filtered["Platform"].isin(ef_plat)]
+
+            st.dataframe(ep_filtered, use_container_width=True, hide_index=True)
+            st.caption(f"{len(ep_filtered)} filas · {len(ep_clips_result)} total")
+
+            st.divider()
+            st.markdown("**Descargar archivos del Edit Plan**")
+
+            ep_files = [
+                (root / "10_Admin" / "edit_plan.csv",  "text/csv",         "edit_plan.csv  — tracker completo (Google Sheets)"),
+                (root / "10_Admin" / "edit_plan.md",   "text/markdown",    "edit_plan.md   — plan legible por clip"),
+                (root / "10_Admin" / "edit_plan.json", "application/json", "edit_plan.json — para plugin Premiere / Resolve"),
+                (root / "10_Admin" / "markers.csv",    "text/csv",         "markers.csv    — marcadores con color por plataforma"),
+            ]
+            for ep_path, ep_mime, ep_label in ep_files:
+                if ep_path.exists():
+                    epc, epb = st.columns([3, 1])
+                    with epc:
+                        st.markdown(f"`{ep_label}`")
+                    with epb:
+                        st.download_button(
+                            label="⬇ Descargar",
+                            data=ep_path.read_bytes(),
+                            file_name=ep_path.name,
+                            mime=ep_mime,
+                            use_container_width=True,
+                            key=f"dl_ep_{ep_path.name}",
+                        )
+
+            st.info(
+                "**edit_plan.json** está diseñado para ser leído por un plugin de "
+                "Premiere Pro o DaVinci Resolve en una fase futura. "
+                "Contiene todos los timecodes, goals y filenames que el plugin "
+                "necesita para crear secuencias y marcadores automáticamente.",
+                icon="🔌",
+            )
