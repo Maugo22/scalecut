@@ -470,6 +470,44 @@ def report(project_path):
     console.print()
 
 
+@main.command(name="update")
+@click.argument("project_path", type=click.Path())
+@click.option("--clip",     required=True, help="Nombre del clip (ej. Clip01).")
+@click.option("--platform", required=True, help="Plataforma (ej. InstagramReels o 'Instagram Reels').")
+@click.option("--format",   "fmt", default=None, help="Formato opcional (ej. 9x16).")
+@click.option("--status",   required=True,
+              type=click.Choice(["Not started", "In edit", "Ready for review",
+                                 "Changes requested", "Approved", "Exported", "Delivered"],
+                                case_sensitive=False),
+              help="Nuevo status.")
+def update_cmd(project_path, clip, platform, fmt, status):
+    """Actualizar el status de entregables en un proyecto existente."""
+    from scalecut.update import update_status, UpdateError
+
+    try:
+        count = update_status(project_path, clip, platform, status, fmt)
+    except UpdateError as e:
+        console.print(f"\n[bold red]Error:[/bold red] {e}\n")
+        sys.exit(1)
+
+    label = f"[bold cyan]{clip}[/bold cyan] · [bold cyan]{platform}[/bold cyan]"
+    if fmt:
+        label += f" · [bold cyan]{fmt}[/bold cyan]"
+
+    console.print()
+    console.print(Panel(
+        Text.from_markup(
+            f"[bold green]✓[/bold green]  {count} entregable{'s' if count != 1 else ''} actualizados\n\n"
+            f"{label}\n"
+            f"[dim]→[/dim]  [bold white]{status}[/bold white]"
+        ),
+        box=box.ROUNDED,
+        border_style="green",
+        padding=(0, 2),
+    ))
+    console.print()
+
+
 @main.command(name="version")
 def show_version():
     """Mostrar versión de ScaleCut."""

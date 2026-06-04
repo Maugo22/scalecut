@@ -227,3 +227,69 @@ class TestCliOutput:
         result = runner.invoke(main, ["report", str(project_root)])
         assert result.exit_code == 1
         assert "delivery_checklist.csv" in result.output
+
+
+# ── Fuzzy path resolution ─────────────────────────────────────────────────────
+
+@pytest.fixture
+def acme_root(tmp_path):
+    """Project that produces ACMESTUDIO_PODCASTLEADERSHIP_20260610."""
+    cfg = make_config(
+        client="AcmeStudio",
+        project="PodcastLeadership",
+        delivery_date="2026-06-10",
+        num_clips=2,
+        platforms=["Instagram Reels", "TikTok"],
+        formats=["9x16"],
+        output_path=str(tmp_path),
+    )
+    root = create_folders(cfg)
+    write_csv(cfg, root)
+    write_config(cfg, root)
+    return root
+
+
+class TestFuzzyPathReport:
+    """load_report and CLI report both resolve human-friendly paths."""
+
+    def test_sanitized_folder_name_is_expected(self, acme_root):
+        assert acme_root.name == "ACMESTUDIO_PODCASTLEADERSHIP_20260610"
+
+    def test_load_report_human_path_mixed_case(self, acme_root):
+        human = acme_root.parent / "AcmeStudio_PodcastLeadership_2026-06-10"
+        data = load_report(human)
+        assert data["client"] == "AcmeStudio"
+        assert data["project"] == "PodcastLeadership"
+
+    def test_load_report_human_path_resolves_to_correct_folder(self, acme_root):
+        human = acme_root.parent / "AcmeStudio_PodcastLeadership_2026-06-10"
+        data = load_report(human)
+        assert data["total"] == 4  # 2 clips × 2 platforms × 1 format
+
+    def test_load_report_lowercase_path(self, acme_root):
+        lower = acme_root.parent / "acmestudio_podcastleadership_2026-06-10"
+        data = load_report(lower)
+        assert data["client"] == "AcmeStudio"
+
+    def test_load_report_hyphens_only_path(self, acme_root):
+        hyphens = acme_root.parent / "AcmeStudio-PodcastLeadership-20260610"
+        data = load_report(hyphens)
+        assert data["client"] == "AcmeStudio"
+
+    def test_cli_report_human_path_exit_0(self, acme_root):
+        runner = CliRunner()
+        human = str(acme_root.parent / "AcmeStudio_PodcastLeadership_2026-06-10")
+        result = runner.invoke(main, ["report", human])
+        assert result.exit_code == 0
+
+    def test_cli_report_human_path_shows_client(self, acme_root):
+        runner = CliRunner()
+        human = str(acme_root.parent / "AcmeStudio_PodcastLeadership_2026-06-10")
+        result = runner.invoke(main, ["report", human])
+        assert "AcmeStudio" in result.output
+
+    def test_cli_report_human_path_shows_delivery_date(self, acme_root):
+        runner = CliRunner()
+        human = str(acme_root.parent / "AcmeStudio_PodcastLeadership_2026-06-10")
+        result = runner.invoke(main, ["report", human])
+        assert "2026-06-10" in result.output

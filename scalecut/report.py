@@ -5,6 +5,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from scalecut.paths import resolve_project_path, ProjectPathError
+
 DONE_STATUSES = {"Approved", "Exported", "Delivered"}
 
 
@@ -14,10 +16,10 @@ class ReportError(Exception):
 
 def load_report(project_path) -> dict:
     """Read project_config.json + delivery_checklist.csv and return report data."""
-    root = Path(project_path)
-
-    if not root.exists():
-        raise ReportError(f"Path no encontrado: {root}")
+    try:
+        root = resolve_project_path(project_path)
+    except ProjectPathError as e:
+        raise ReportError(str(e)) from e
 
     config_path = root / "10_Admin" / "project_config.json"
     checklist_path = root / "10_Admin" / "delivery_checklist.csv"
