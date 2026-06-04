@@ -70,6 +70,34 @@ scalecut quick ~/Desktop/ScaleCut_Projects \
   --status "Not started"
 ```
 
+### Project progress report
+
+Generate a progress summary for an existing ScaleCut project:
+
+```bash
+scalecut report ~/Desktop/ScaleCut_Projects/NIKE_VERANO_2024_20241215
+```
+
+Output includes:
+
+- Client, project name, type and delivery date
+- Total deliverables and per-status breakdown
+- % Delivered and % Approved + Exported + Delivered
+- Platforms and formats in scope
+- Suggested next action based on current progress
+
+Error cases handled:
+
+```bash
+# Path does not exist
+scalecut report /path/to/nonexistent
+# → Error: Path no encontrado: /path/to/nonexistent
+
+# Missing project_config.json or delivery_checklist.csv
+scalecut report /path/to/incomplete-project
+# → Error: No se encontró project_config.json en ...
+```
+
 ### List available templates
 
 ```bash
