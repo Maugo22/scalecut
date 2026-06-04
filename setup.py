@@ -12,6 +12,9 @@ setup(
         "questionary>=2.0.0",
         "rich>=13.0.0",
     ],
+    extras_require={
+        "dev": ["pytest>=8.0.0"],
+    },
     entry_points={
         "console_scripts": [
             "scalecut=scalecut.cli:main",
