@@ -6,3 +6,4 @@ __pycache__/
 dist/
 build/
 examples/ACME_STUDIO_*/
+output/
