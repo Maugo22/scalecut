@@ -388,6 +388,88 @@ def list_templates():
     console.print(table)
 
 
+@main.command()
+@click.argument("project_path", type=click.Path())
+def report(project_path):
+    """Resumen de progreso de un proyecto ScaleCut existente."""
+    from scalecut.report import load_report, ReportError
+
+    try:
+        data = load_report(project_path)
+    except ReportError as e:
+        console.print(f"\n[bold red]Error:[/bold red] {e}\n")
+        sys.exit(1)
+
+    # ── Header ─────────────────────────────────────────────────────────────
+    console.print()
+    console.print(Panel(
+        Text.from_markup(
+            f"[bold cyan]{data['client']}[/bold cyan]  [dim]—[/dim]  "
+            f"[bold white]{data['project']}[/bold white]\n"
+            f"[dim]{data['project_type']}  ·  Entrega: {data['delivery_date']}[/dim]"
+        ),
+        box=box.ROUNDED,
+        border_style="cyan",
+        padding=(0, 2),
+        title="[bold]ScaleCut Report[/bold]",
+        title_align="left",
+    ))
+    console.print()
+
+    # ── Progress summary ────────────────────────────────────────────────────
+    total = data["total"]
+    delivered = data["status_counts"].get("Delivered", 0)
+    pct_d = data["pct_delivered"]
+    pct_a = data["pct_advanced"]
+
+    summary = Table(box=box.SIMPLE_HEAD, show_header=False, padding=(0, 2))
+    summary.add_column("Campo", style="dim", no_wrap=True)
+    summary.add_column("Valor", style="bold white")
+    summary.add_row("Total entregables", str(total))
+    summary.add_row("Delivered", f"{delivered}  [dim]({pct_d}%)[/dim]")
+    summary.add_row(
+        "Approved + Exported + Delivered",
+        f"{sum(data['status_counts'].get(s, 0) for s in ('Approved', 'Exported', 'Delivered'))}"
+        f"  [dim]({pct_a}%)[/dim]",
+    )
+    summary.add_row("Plataformas", ", ".join(data["platforms"]))
+    summary.add_row("Formatos", ", ".join(data["formats"]))
+    console.print(summary)
+
+    # ── Status breakdown ────────────────────────────────────────────────────
+    from scalecut.templates import STATUSES
+
+    status_table = Table(
+        title="Estado de entregables",
+        box=box.SIMPLE_HEAD,
+        title_style="bold",
+        padding=(0, 2),
+    )
+    status_table.add_column("Status", style="cyan", no_wrap=True)
+    status_table.add_column("Cantidad", justify="right")
+    status_table.add_column("Porcentaje", justify="right", style="dim")
+
+    for status in STATUSES:
+        count = data["status_counts"].get(status, 0)
+        if count == 0:
+            continue
+        pct = round(count / total * 100, 1) if total else 0.0
+        status_table.add_row(status, str(count), f"{pct}%")
+
+    console.print(status_table)
+
+    # ── Next action ─────────────────────────────────────────────────────────
+    console.print(Panel(
+        Text.from_markup(
+            f"[bold yellow]Próxima acción:[/bold yellow]  {data['next_action']}"
+        ),
+        box=box.ROUNDED,
+        border_style="yellow",
+        padding=(0, 2),
+    ))
+    console.print()
+
+
 @main.command(name="version")
 def show_version():
     """Mostrar versión de ScaleCut."""
