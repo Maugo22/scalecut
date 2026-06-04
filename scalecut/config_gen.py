@@ -12,6 +12,8 @@ GENERATED_FILES = [
     "10_Admin/delivery_checklist.csv",
     "10_Admin/delivery_checklist.md",
     "10_Admin/naming_preview.md",
+    "10_Admin/editor_instructions.md",
+    "10_Admin/prompts_ai.md",
     "10_Admin/project_config.json",
 ]
 

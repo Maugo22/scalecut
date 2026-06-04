@@ -25,6 +25,8 @@ from scalecut.checklist import write_csv, write_markdown
 from scalecut.config_gen import write_config
 from scalecut.readme_gen import write_readme
 from scalecut.preview import show_preview, write_naming_preview
+from scalecut.editor_instructions import write_editor_instructions
+from scalecut.prompts_ai import write_prompts_ai
 from scalecut import __version__
 
 console = Console()
@@ -261,6 +263,12 @@ def scaffold(config: ProjectConfig) -> None:
 
     write_naming_preview(config, root)
     console.print(f"  [bold green]✓[/bold green]  naming_preview.md      [dim]nombres por clip y plataforma[/dim]")
+
+    write_editor_instructions(config, root)
+    console.print(f"  [bold green]✓[/bold green]  editor_instructions.md [dim]workflow Premiere / Resolve[/dim]")
+
+    write_prompts_ai(config, root)
+    console.print(f"  [bold green]✓[/bold green]  prompts_ai.md          [dim]6 prompts listos para IA[/dim]")
 
     write_config(config, root)
     console.print(f"  [bold green]✓[/bold green]  project_config.json    [dim]resumen + {row_count} entregables[/dim]")
