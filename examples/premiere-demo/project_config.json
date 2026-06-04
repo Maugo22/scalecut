@@ -1,0 +1,426 @@
+{
+  "scalecut_version": "0.1.0",
+  "project": {
+    "client": "Acme Studio",
+    "project": "Podcast Leadership",
+    "project_type": "Podcast Repurposing",
+    "delivery_date": "2024-12-20",
+    "num_clips": 5,
+    "platforms": [
+      "Instagram Reels",
+      "TikTok",
+      "LinkedIn",
+      "YouTube Shorts"
+    ],
+    "formats": [
+      "9x16",
+      "1x1"
+    ],
+    "version": "01",
+    "language": "ES",
+    "initial_status": "Not started",
+    "output_path": "/Users/monicasanchez/scalecut/examples/premiere-demo",
+    "created_at": "2026-06-03T21:37:01"
+  },
+  "summary": {
+    "total_deliverables": 40,
+    "clips": 5,
+    "platforms": 4,
+    "formats": 2,
+    "platforms_list": [
+      "Instagram Reels",
+      "TikTok",
+      "LinkedIn",
+      "YouTube Shorts"
+    ],
+    "formats_list": [
+      "9x16",
+      "1x1"
+    ]
+  },
+  "folder_structure": [
+    "01_Footage",
+    "02_Audio",
+    "03_Graphics",
+    "04_Project_Files",
+    "05_Sequences",
+    "06_Subtitles",
+    "07_Exports",
+    "08_Delivery",
+    "09_References",
+    "10_Admin",
+    "07_Exports/9x16",
+    "07_Exports/1x1"
+  ],
+  "generated_files": [
+    "README.md",
+    "10_Admin/delivery_checklist.csv",
+    "10_Admin/delivery_checklist.md",
+    "10_Admin/naming_preview.md",
+    "10_Admin/editor_instructions.md",
+    "10_Admin/prompts_ai.md",
+    "10_Admin/project_config.json"
+  ],
+  "deliverables": [
+    {
+      "clip": "Clip01",
+      "platform": "Instagram Reels",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_INSTA_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "Instagram Reels",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_INSTA_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "TikTok",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_TIKTOK_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "TikTok",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_TIKTOK_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "LinkedIn",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_LINKEDIN_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "LinkedIn",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_LINKEDIN_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "YouTube Shorts",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_YTSHORTS_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip01",
+      "platform": "YouTube Shorts",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip01_YTSHORTS_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "Instagram Reels",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_INSTA_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "Instagram Reels",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_INSTA_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "TikTok",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_TIKTOK_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "TikTok",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_TIKTOK_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "LinkedIn",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_LINKEDIN_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "LinkedIn",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_LINKEDIN_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "YouTube Shorts",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_YTSHORTS_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip02",
+      "platform": "YouTube Shorts",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip02_YTSHORTS_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "Instagram Reels",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_INSTA_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "Instagram Reels",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_INSTA_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "TikTok",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_TIKTOK_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "TikTok",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_TIKTOK_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "LinkedIn",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_LINKEDIN_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "LinkedIn",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_LINKEDIN_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "YouTube Shorts",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_YTSHORTS_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip03",
+      "platform": "YouTube Shorts",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip03_YTSHORTS_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "Instagram Reels",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_INSTA_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "Instagram Reels",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_INSTA_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "TikTok",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_TIKTOK_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "TikTok",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_TIKTOK_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "LinkedIn",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_LINKEDIN_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "LinkedIn",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_LINKEDIN_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "YouTube Shorts",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_YTSHORTS_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip04",
+      "platform": "YouTube Shorts",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip04_YTSHORTS_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "Instagram Reels",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_INSTA_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "Instagram Reels",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_INSTA_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "TikTok",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_TIKTOK_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "TikTok",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_TIKTOK_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "LinkedIn",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_LINKEDIN_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "LinkedIn",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_LINKEDIN_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "YouTube Shorts",
+      "format": "9x16",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_YTSHORTS_9x16_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    },
+    {
+      "clip": "Clip05",
+      "platform": "YouTube Shorts",
+      "format": "1x1",
+      "status": "Not started",
+      "filename": "ACME_STUDIO_PODCAST_LEADERSHIP_Clip05_YTSHORTS_1x1_20241220_V01.mp4",
+      "language": "ES",
+      "version": "V01"
+    }
+  ]
+}
