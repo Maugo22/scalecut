@@ -27,6 +27,10 @@ from scalecut.readme_gen import write_readme
 from scalecut.preview import show_preview, write_naming_preview
 from scalecut.editor_instructions import write_editor_instructions
 from scalecut.prompts_ai import write_prompts_ai
+from scalecut.edit_plan import (
+    make_placeholder_clips, write_edit_plan_csv, write_edit_plan_md,
+    write_edit_plan_json, write_markers_csv,
+)
 from scalecut import __version__
 
 console = Console()
@@ -275,6 +279,14 @@ def scaffold(config: ProjectConfig) -> None:
 
     write_readme(config, root)
     console.print(f"  [bold green]✓[/bold green]  README.md")
+
+    ep_clips = make_placeholder_clips(config)
+    write_edit_plan_csv(ep_clips, root)
+    write_edit_plan_md(ep_clips, root, config)
+    write_edit_plan_json(ep_clips, root, config)
+    write_markers_csv(ep_clips, root)
+    console.print(f"  [bold green]✓[/bold green]  edit_plan.*            [dim]plan vacío — rellena los timecodes[/dim]")
+    console.print(f"  [bold green]✓[/bold green]  markers.csv            [dim]marcadores para Premiere / Resolve[/dim]")
 
     console.print()
     console.print(Panel(
