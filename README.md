@@ -98,6 +98,33 @@ scalecut report /path/to/incomplete-project
 # → Error: No se encontró project_config.json en ...
 ```
 
+### List projects in a folder
+
+Scan a directory and show all ScaleCut projects with their status at a glance:
+
+```bash
+# Default: looks in ./output
+scalecut list
+
+# Custom base path
+scalecut list --base-path ~/Desktop/ScaleCut_Projects
+```
+
+Output shows a table with client, project, delivery date, type, total deliverables,
+status breakdown, progress %, and path. Projects are sorted by delivery date.
+
+```
+Proyectos en ./output  (3 encontrados)
+
+ Cliente     Proyecto           Entrega      Tipo                   Total  Status                    Progreso  Ruta
+ ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ AcmeStudio  PodcastLeadership  2026-06-10   Podcast Repurposing    18     16 Not started · 2 In …       0%  output/ACMESTUDIO_…
+ Nike        Verano24           2026-07-01   Campaña publicitaria   24     24 Not started                 0%  output/NIKE_…
+ Adidas      Invierno25         2026-12-15   Reels/Shorts marca     12     8 Approved · 4 Delivered      33%  output/ADIDAS_…
+```
+
+Folders missing `project_config.json` or `delivery_checklist.csv` are silently skipped.
+
 ### List available templates
 
 ```bash

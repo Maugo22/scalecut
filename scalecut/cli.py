@@ -508,6 +508,77 @@ def update_cmd(project_path, clip, platform, fmt, status):
     console.print()
 
 
+@main.command(name="list")
+@click.option("--base-path", default="./output",
+              help="Carpeta base donde buscar proyectos (default: ./output).")
+def list_projects(base_path):
+    """Listar proyectos ScaleCut en una carpeta base."""
+    from scalecut.list_projects import find_projects, ListError
+
+    try:
+        projects = find_projects(base_path)
+    except ListError as e:
+        console.print(f"\n[bold red]Error:[/bold red] {e}\n")
+        sys.exit(1)
+
+    console.print()
+
+    if not projects:
+        console.print(Panel(
+            Text.from_markup(
+                f"[dim]No se encontraron proyectos ScaleCut en[/dim] "
+                f"[bold white]{base_path}[/bold white]\n\n"
+                "[dim]Crea uno con [bold]scalecut new[/bold] o [bold]scalecut quick[/bold].[/dim]"
+            ),
+            box=box.ROUNDED,
+            border_style="dim",
+            padding=(0, 2),
+        ))
+        console.print()
+        return
+
+    table = Table(
+        title=f"Proyectos en {base_path}  [dim]({len(projects)} encontrados)[/dim]",
+        box=box.SIMPLE_HEAD,
+        title_style="bold",
+        title_justify="left",
+        padding=(0, 1),
+        show_lines=False,
+    )
+    table.add_column("Cliente",   style="bold cyan",  no_wrap=True)
+    table.add_column("Proyecto",  style="bold white",  no_wrap=True)
+    table.add_column("Entrega",   style="dim",         no_wrap=True)
+    table.add_column("Tipo",      style="dim",         max_width=22)
+    table.add_column("Total",     justify="right")
+    table.add_column("Status",    style="dim",         max_width=40)
+    table.add_column("Progreso",  justify="right",     style="green")
+    table.add_column("Ruta",      style="dim",         max_width=38)
+
+    for p in projects:
+        pct = p["pct_advanced"]
+        pct_str = f"{pct:.0f}%"
+        if pct == 100:
+            pct_str = "[bold green]100%[/bold green]"
+        elif pct >= 75:
+            pct_str = f"[green]{pct_str}[/green]"
+        elif pct >= 40:
+            pct_str = f"[yellow]{pct_str}[/yellow]"
+
+        table.add_row(
+            p["client"],
+            p["project"],
+            p["delivery_date"],
+            p["project_type"],
+            str(p["total"]),
+            p["status_summary"],
+            pct_str,
+            p["path"],
+        )
+
+    console.print(table)
+    console.print()
+
+
 @main.command(name="version")
 def show_version():
     """Mostrar versión de ScaleCut."""
