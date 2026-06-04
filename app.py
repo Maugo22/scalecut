@@ -9,7 +9,6 @@ import streamlit as st
 from scalecut import __version__
 from scalecut.checklist import write_csv, write_markdown
 from scalecut.config_gen import write_config
-from scalecut.demo import DEMO_PROJECT
 from scalecut.editor_instructions import write_editor_instructions
 from scalecut.folders import build_folder_tree, create_folders
 from scalecut.models import ProjectConfig
@@ -134,28 +133,27 @@ st.markdown(
     "**De brief a carpetas, checklists y nombres de archivo en 10 segundos.** "
     "Estructura tu próximo proyecto de video sin perder tiempo en naming manual."
 )
-st.code("NIKE_VERANO24_Clip01_INSTA_9x16_20241215_V01.mp4", language=None)
+
+# Dynamic filename example — updates live as the user fills the form
+_c     = st.session_state.get(K["client"],    "").strip()
+_p     = st.session_state.get(K["project"],   "").strip()
+_d     = str(st.session_state.get(K["date"],  date.today())).replace("-", "")
+_plats = st.session_state.get(K["platforms"], [])
+_fmts  = st.session_state.get(K["formats"],   [])
+_ver   = st.session_state.get(K["version"],   "01")
+
+if _c and _p and _plats and _fmts:
+    from scalecut.naming import platform_slug as _pslug
+    _hero = (
+        f"{sanitize(_c)}_{sanitize(_p)}_Clip01"
+        f"_{_pslug(_plats[0])}_{_fmts[0]}"
+        f"_{_d}_V{_ver.zfill(2)}.mp4"
+    )
+else:
+    _hero = "CLIENTE_PROYECTO_Clip01_PLATAFORMA_FORMATO_FECHA_V01.mp4"
+
+st.code(_hero, language=None)
 st.divider()
-
-# ── Demo button ───────────────────────────────────────────────────────────────
-
-col_demo, col_spacer = st.columns([2, 5])
-with col_demo:
-    if st.button("🎬 Cargar proyecto demo", use_container_width=True):
-        st.session_state[K["proj_type"]] = DEMO_PROJECT["project_type"]
-        st.session_state[K["client"]]    = DEMO_PROJECT["client"]
-        st.session_state[K["project"]]   = DEMO_PROJECT["project"]
-        st.session_state[K["date"]]      = date.fromisoformat(DEMO_PROJECT["delivery_date"])
-        st.session_state[K["clips"]]     = DEMO_PROJECT["num_clips"]
-        st.session_state[K["platforms"]] = list(DEMO_PROJECT["platforms"])
-        st.session_state[K["formats"]]   = list(DEMO_PROJECT["formats"])
-        st.session_state[K["version"]]   = DEMO_PROJECT["version"]
-        st.session_state[K["language"]]  = DEMO_PROJECT["language"]
-        st.session_state[K["status"]]    = DEMO_PROJECT["initial_status"]
-        st.session_state[K["prev_type"]] = DEMO_PROJECT["project_type"]
-        st.rerun()
-with col_spacer:
-    st.caption("Carga el caso Acme Studio / Podcast Leadership con un clic. Puedes editar todos los campos después.")
 
 # ── Template card ─────────────────────────────────────────────────────────────
 
