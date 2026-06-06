@@ -1,6 +1,8 @@
 """ScaleCut — Streamlit web UI."""
 
 import csv
+import html
+import json
 from datetime import date
 from pathlib import Path
 
@@ -225,6 +227,155 @@ st.markdown(
         overflow-wrap: anywhere;
     }
 
+    .sc-studio-shell {
+        border: 1px solid var(--sc-line);
+        border-radius: 16px;
+        background:
+            linear-gradient(135deg, rgba(46, 233, 208, 0.055), transparent 34%),
+            linear-gradient(180deg, rgba(246, 240, 230, 0.065), rgba(246, 240, 230, 0.025)),
+            rgba(9, 14, 26, 0.94);
+        box-shadow: var(--sc-shadow-panel);
+        padding: 18px;
+        margin: 6px 0 22px;
+    }
+
+    .sc-studio-grid {
+        display: grid;
+        grid-template-columns: minmax(180px, 0.7fr) minmax(320px, 1.6fr) minmax(220px, 0.9fr);
+        gap: 14px;
+    }
+
+    .sc-studio-card {
+        border: 1px solid rgba(246, 240, 230, 0.12);
+        border-radius: 14px;
+        background: rgba(8, 13, 24, 0.74);
+        padding: 15px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    }
+
+    .sc-studio-card h3,
+    .sc-studio-card h4 {
+        margin: 0 0 8px;
+    }
+
+    .sc-studio-card p {
+        color: var(--sc-muted);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    .sc-module-list {
+        display: grid;
+        gap: 8px;
+    }
+
+    .sc-module-item {
+        border: 1px solid rgba(246, 240, 230, 0.1);
+        border-radius: 12px;
+        background: rgba(246, 240, 230, 0.04);
+        padding: 10px 11px;
+        color: var(--sc-muted-strong);
+        transition:
+            transform 150ms var(--sc-ease-press),
+            border-color 180ms var(--sc-ease-out),
+            background 180ms var(--sc-ease-out);
+    }
+
+    .sc-module-item:hover {
+        transform: translateY(-1px);
+        border-color: rgba(46, 233, 208, 0.26);
+        background: rgba(46, 233, 208, 0.07);
+    }
+
+    .sc-module-item strong {
+        color: var(--sc-ivory);
+        display: block;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .sc-canvas {
+        min-height: 280px;
+        display: grid;
+        align-content: space-between;
+        gap: 18px;
+        background:
+            linear-gradient(90deg, rgba(246, 240, 230, 0.03) 1px, transparent 1px),
+            linear-gradient(180deg, rgba(246, 240, 230, 0.03) 1px, transparent 1px),
+            rgba(4, 8, 16, 0.74);
+        background-size: 44px 44px;
+    }
+
+    .sc-canvas-title {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .sc-status-chip {
+        border-radius: 999px;
+        border: 1px solid rgba(46, 233, 208, 0.26);
+        background: rgba(46, 233, 208, 0.08);
+        color: var(--sc-teal);
+        font-size: 12px;
+        padding: 6px 10px;
+        white-space: nowrap;
+    }
+
+    .sc-timeline {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 1.5fr 0.7fr;
+        gap: 7px;
+        align-items: end;
+    }
+
+    .sc-tick {
+        min-height: 54px;
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(155, 140, 255, 0.28), rgba(46, 233, 208, 0.12));
+        border: 1px solid rgba(246, 240, 230, 0.1);
+        padding: 9px;
+        font-size: 11px;
+        color: var(--sc-muted-strong);
+    }
+
+    .sc-export-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .sc-export-pill {
+        border-radius: 999px;
+        background: rgba(246, 240, 230, 0.055);
+        border: 1px solid rgba(246, 240, 230, 0.1);
+        color: var(--sc-muted-strong);
+        padding: 6px 9px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+        .sc-studio-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .sc-studio-shell {
+            padding: 12px;
+        }
+
+        .sc-canvas-title {
+            display: grid;
+        }
+
+        .sc-timeline {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
     div[data-testid="stExpander"] {
         border: 1px solid rgba(246, 240, 230, 0.14);
         border-radius: 14px;
@@ -402,6 +553,155 @@ def _load_dashboard_deliverables(project_path) -> list[dict]:
     with open(checklist, encoding="utf-8", newline="") as f:
         return list(csv.DictReader(f))
 
+
+def _split_lines(value: str) -> list[str]:
+    return [item.strip() for item in value.replace(",", "\n").splitlines() if item.strip()]
+
+
+def _json_bytes(payload: dict | list[dict]) -> bytes:
+    return json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
+
+
+def _html(value) -> str:
+    return html.escape(str(value or "—"))
+
+
+def _brand_memory_payload(
+    client: str,
+    voice: str,
+    audience: str,
+    colors: list[str],
+    logo_notes: str,
+    subtitle_style: str,
+    banned_terms: list[str],
+    brand_rules: list[str],
+) -> dict:
+    return {
+        "client": client.strip() or "Nuevo cliente",
+        "voice": voice,
+        "audience": audience.strip(),
+        "colors": colors,
+        "logo_notes": logo_notes.strip(),
+        "subtitle_style": subtitle_style,
+        "banned_terms": banned_terms,
+        "brand_rules": brand_rules,
+        "ai_usage": {
+            "naming": "Apply brand-safe client and project labels.",
+            "subtitles": "Use subtitle_style as the default caption direction.",
+            "prompt_remix": "Keep voice, audience, and banned_terms in every generated variant.",
+            "exports": "Use colors and logo_notes for platform packaging notes.",
+        },
+    }
+
+
+def _brand_memory_markdown(profile: dict) -> str:
+    colors = ", ".join(profile["colors"]) or "Not defined"
+    banned = ", ".join(profile["banned_terms"]) or "None"
+    rules = "\n".join(f"- {rule}" for rule in profile["brand_rules"]) or "- No extra rules yet"
+    return f"""# Brand Memory: {profile['client']}
+
+## Voice
+{profile['voice']}
+
+## Audience
+{profile['audience'] or 'Not defined'}
+
+## Colors
+{colors}
+
+## Logo and usage notes
+{profile['logo_notes'] or 'Not defined'}
+
+## Subtitle style
+{profile['subtitle_style']}
+
+## Banned terms
+{banned}
+
+## Brand rules
+{rules}
+"""
+
+
+def _prompt_remix_rows(core_prompt: str, platforms: list[str], objective: str, intensity: str) -> list[dict]:
+    platform_angles = {
+        "Instagram Reels": "visual hook first, short caption beats, branded ending",
+        "TikTok": "fast hook, direct language, remix-friendly pacing",
+        "YouTube Shorts": "clear setup, payoff, retention-focused captions",
+        "LinkedIn": "professional framing, outcome-driven copy, calmer pacing",
+        "Facebook": "context-rich copy, accessible pacing, broad audience",
+    }
+    rows = []
+    selected = platforms or ["Instagram Reels", "TikTok", "YouTube Shorts"]
+    for platform in selected:
+        angle = platform_angles.get(platform, "platform-specific structure and caption pacing")
+        rows.append({
+            "platform": platform,
+            "objective": objective,
+            "intensity": intensity,
+            "prompt": (
+                f"{core_prompt.strip() or 'Create a short-form edit from this raw clip.'} "
+                f"Adapt for {platform}: {angle}. Keep the objective as {objective.lower()} "
+                f"with {intensity.lower()} creative intensity."
+            ),
+        })
+    return rows
+
+
+def _style_dna_payload(
+    name: str,
+    pace: int,
+    caption_weight: int,
+    motion_energy: int,
+    hook_pattern: str,
+    subtitle_treatment: str,
+    visual_rules: list[str],
+) -> dict:
+    return {
+        "style_name": name.strip() or "ScaleCut Style DNA",
+        "pace": pace,
+        "caption_weight": caption_weight,
+        "motion_energy": motion_energy,
+        "hook_pattern": hook_pattern,
+        "subtitle_treatment": subtitle_treatment,
+        "visual_rules": visual_rules,
+        "defaults": {
+            "safe_zones": "Keep subtitles inside platform-safe lower third.",
+            "branding": "Use Brand Memory colors and logo rules when available.",
+            "motion": "Use transitions to clarify edits, not decorate repeated actions.",
+        },
+    }
+
+
+def _scene_builder_rows(scene_count: int, platform: str, goal: str, hook_style: str) -> list[dict]:
+    rows = []
+    for idx in range(1, scene_count + 1):
+        start = (idx - 1) * 8
+        end = idx * 8
+        rows.append({
+            "scene": f"Scene {idx:02d}",
+            "time_range": f"00:{start:02d}-00:{end:02d}",
+            "goal": goal,
+            "hook": hook_style if idx == 1 else "Advance the point with a visual proof or quote.",
+            "platform": platform,
+            "needs": "dialogue, b-roll, subtitle, brand cue",
+        })
+    return rows
+
+
+def _asset_manifest_rows(uploaded_files, default_role: str, default_stage: str) -> list[dict]:
+    rows = []
+    for file in uploaded_files or []:
+        rows.append({
+            "asset": file.name,
+            "role": default_role,
+            "stage": default_stage,
+            "mime": file.type or "unknown",
+            "size_kb": round((file.size or 0) / 1024, 1),
+            "usage_note": "Attach to Brand Memory, Scene Builder, or export packaging.",
+        })
+    return rows
+
 # ── Session state keys ────────────────────────────────────────────────────────
 
 K = dict(
@@ -507,8 +807,8 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-tab_dashboard, tab_new_project, tab_edit_plan = st.tabs(
-    ["Creative Flow", "Nuevo proyecto", "Edit Plan"]
+tab_dashboard, tab_new_project, tab_edit_plan, tab_ai_studio = st.tabs(
+    ["Creative Flow", "Nuevo proyecto", "Edit Plan", "AI Studio"]
 )
 
 with tab_dashboard:
@@ -826,6 +1126,365 @@ with tab_edit_plan:
                             key=f"ep_notes_{clip_id}",
                             height=130,
                         )
+
+with tab_ai_studio:
+    st.markdown("### AI Studio")
+    st.caption(
+        "Un workspace para convertir la estructura de ScaleCut en dirección creativa: marca, prompts, estilo, escenas y assets."
+    )
+
+    studio_client = st.session_state.get(K["client"], "").strip() or "Cliente activo"
+    studio_project = st.session_state.get(K["project"], "").strip() or "Proyecto creativo"
+    studio_platforms = st.session_state.get(K["platforms"], []) or ["Instagram Reels", "TikTok", "YouTube Shorts"]
+    studio_formats = st.session_state.get(K["formats"], []) or ["9x16", "1x1"]
+    studio_deliverables = int(st.session_state.get(K["clips"], 5)) * len(studio_platforms) * len(studio_formats)
+
+    st.markdown(
+        f"""
+        <section class="sc-studio-shell">
+            <div class="sc-studio-grid">
+                <aside class="sc-studio-card">
+                    <h4>Creative Cockpit</h4>
+                    <p>Seis módulos conectados para pasar de raw clip a sistema creativo escalable.</p>
+                    <div class="sc-module-list" style="margin-top: 12px;">
+                        <div class="sc-module-item"><strong>Brand Memory</strong>Cliente, tono, reglas, colores.</div>
+                        <div class="sc-module-item"><strong>Prompt Remix</strong>Variantes por plataforma.</div>
+                        <div class="sc-module-item"><strong>Style DNA</strong>Ritmo, captions, motion.</div>
+                        <div class="sc-module-item"><strong>Scene Builder</strong>Escenas con hook y objetivo.</div>
+                        <div class="sc-module-item"><strong>AI Assets Library</strong>Assets clasificados por uso.</div>
+                    </div>
+                </aside>
+                <main class="sc-studio-card sc-canvas">
+                    <div class="sc-canvas-title">
+                        <div>
+                            <h3>{_html(studio_project)}</h3>
+                            <p>{_html(studio_client)} · {studio_deliverables} entregables estimados</p>
+                        </div>
+                        <span class="sc-status-chip">AI-ready workflow</span>
+                    </div>
+                    <div class="sc-timeline" aria-label="AI Studio timeline">
+                        <div class="sc-tick">01 · Raw clip</div>
+                        <div class="sc-tick">02 · Transcript</div>
+                        <div class="sc-tick">03 · Scene plan</div>
+                        <div class="sc-tick">04 · Export</div>
+                    </div>
+                    <div class="sc-export-row">
+                        <span class="sc-export-pill">Brand profile</span>
+                        <span class="sc-export-pill">Prompt set</span>
+                        <span class="sc-export-pill">Style JSON</span>
+                        <span class="sc-export-pill">Scene CSV</span>
+                    </div>
+                </main>
+                <aside class="sc-studio-card">
+                    <h4>Properties</h4>
+                    <p>Plataformas: {_html(', '.join(studio_platforms))}</p>
+                    <p>Formatos: {_html(', '.join(studio_formats))}</p>
+                    <div class="sc-export-row">
+                        <span class="sc-export-pill">Captions</span>
+                        <span class="sc-export-pill">Branding</span>
+                        <span class="sc-export-pill">Scenes</span>
+                    </div>
+                </aside>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    (
+        tab_brand_memory,
+        tab_prompt_remix,
+        tab_style_dna,
+        tab_scene_builder,
+        tab_assets_library,
+    ) = st.tabs([
+        "Brand Memory",
+        "Prompt Remix",
+        "Style DNA",
+        "Scene Builder",
+        "AI Assets Library",
+    ])
+
+    with tab_brand_memory:
+        bm_left, bm_right = st.columns([1.05, 0.95])
+        with bm_left:
+            bm_client = st.text_input("Cliente", value=studio_client, key="bm_client")
+            bm_voice = st.selectbox(
+                "Voz de marca",
+                [
+                    "Precisa, premium y calmada",
+                    "Directa, social y energética",
+                    "Educativa, clara y confiable",
+                    "Editorial, sofisticada y sobria",
+                ],
+                key="bm_voice",
+            )
+            bm_audience = st.text_area(
+                "Audiencia",
+                value="Creadores, equipos de marketing y clientes que necesitan entender el valor del contenido rápido.",
+                key="bm_audience",
+                height=92,
+            )
+            bm_colors_raw = st.text_input(
+                "Colores de marca",
+                value="#2EE9D0, #9B8CFF, #FF8B70",
+                key="bm_colors",
+            )
+        with bm_right:
+            bm_logo_notes = st.text_area(
+                "Reglas de logo y branding",
+                value="Mantener logo dentro de safe zones. Usar marca al cierre y en lower thirds cuando aplique.",
+                key="bm_logo_notes",
+                height=92,
+            )
+            bm_subtitle_style = st.selectbox(
+                "Estilo de subtítulos",
+                [
+                    "Clean bold lower third",
+                    "Kinetic captions con énfasis por palabra clave",
+                    "Editorial minimal con alto contraste",
+                    "Social native con highlights de color",
+                ],
+                key="bm_subtitle_style",
+            )
+            bm_banned_terms_raw = st.text_area(
+                "Palabras o frases prohibidas",
+                value="viral, game changer, unleash",
+                key="bm_banned_terms",
+                height=72,
+            )
+            bm_rules_raw = st.text_area(
+                "Reglas de marca",
+                value="No usar rojo como color principal\nMantener tono claro y experto\nEvitar claims imposibles de comprobar",
+                key="bm_rules",
+                height=92,
+            )
+
+        brand_profile = _brand_memory_payload(
+            bm_client,
+            bm_voice,
+            bm_audience,
+            _split_lines(bm_colors_raw),
+            bm_logo_notes,
+            bm_subtitle_style,
+            _split_lines(bm_banned_terms_raw),
+            _split_lines(bm_rules_raw),
+        )
+        bm_downloads = st.columns(2)
+        with bm_downloads[0]:
+            st.download_button(
+                "Descargar brand_memory.json",
+                data=_json_bytes(brand_profile),
+                file_name="brand_memory.json",
+                mime="application/json",
+                use_container_width=True,
+                key="dl_brand_memory_json",
+            )
+        with bm_downloads[1]:
+            st.download_button(
+                "Descargar brand_memory.md",
+                data=_brand_memory_markdown(brand_profile).encode("utf-8"),
+                file_name="brand_memory.md",
+                mime="text/markdown",
+                use_container_width=True,
+                key="dl_brand_memory_md",
+            )
+        st.json(brand_profile, expanded=False)
+
+    with tab_prompt_remix:
+        remix_left, remix_right = st.columns([1.1, 0.9])
+        with remix_left:
+            core_prompt = st.text_area(
+                "Prompt base",
+                value=(
+                    "Edita este raw clip en una pieza corta con hook claro, ritmo preciso, "
+                    "subtítulos legibles y cierre alineado a la marca."
+                ),
+                key="remix_core_prompt",
+                height=130,
+            )
+            remix_platforms = st.multiselect(
+                "Plataformas",
+                options=ALL_PLATFORMS,
+                default=[p for p in studio_platforms if p in ALL_PLATFORMS],
+                key="remix_platforms",
+            )
+        with remix_right:
+            remix_objective = st.selectbox(
+                "Objetivo",
+                ["Awareness", "Lead magnet", "Educación", "Conversión", "Retención"],
+                key="remix_objective",
+            )
+            remix_intensity = st.select_slider(
+                "Intensidad creativa",
+                options=["Baja", "Media", "Alta", "Experimental"],
+                value="Alta",
+                key="remix_intensity",
+            )
+            st.info(
+                "Cada remix hereda Brand Memory y adapta estructura, copy y caption pacing por plataforma.",
+                icon="✨",
+            )
+
+        remix_rows = _prompt_remix_rows(core_prompt, remix_platforms, remix_objective, remix_intensity)
+        remix_df = pd.DataFrame(remix_rows)
+        st.dataframe(remix_df, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Descargar prompt_remix.json",
+            data=_json_bytes(remix_rows),
+            file_name="prompt_remix.json",
+            mime="application/json",
+            use_container_width=True,
+            key="dl_prompt_remix_json",
+        )
+
+    with tab_style_dna:
+        dna_left, dna_right = st.columns(2)
+        with dna_left:
+            style_name = st.text_input("Nombre del estilo", value="ScaleCut Editorial Social", key="dna_name")
+            hook_pattern = st.selectbox(
+                "Patrón de hook",
+                [
+                    "Problem first",
+                    "Contraste antes/después",
+                    "Pregunta directa",
+                    "Declaración experta",
+                    "Momento emocional",
+                ],
+                key="dna_hook",
+            )
+            subtitle_treatment = st.selectbox(
+                "Tratamiento de subtítulos",
+                [
+                    "Lower third compacto",
+                    "Palabra clave resaltada",
+                    "Dos líneas con ritmo de diálogo",
+                    "Subtítulo grande tipo creator",
+                ],
+                key="dna_subtitles",
+            )
+        with dna_right:
+            pace = st.slider("Ritmo de edición", min_value=1, max_value=10, value=7, key="dna_pace")
+            caption_weight = st.slider("Peso visual de captions", min_value=1, max_value=10, value=6, key="dna_caption")
+            motion_energy = st.slider("Energía de motion", min_value=1, max_value=10, value=5, key="dna_motion")
+            visual_rules_raw = st.text_area(
+                "Reglas visuales",
+                value="Usar contraste alto\nAnimar solo cambios de estado\nMantener safe zones por plataforma",
+                key="dna_rules",
+                height=95,
+            )
+        style_dna = _style_dna_payload(
+            style_name,
+            pace,
+            caption_weight,
+            motion_energy,
+            hook_pattern,
+            subtitle_treatment,
+            _split_lines(visual_rules_raw),
+        )
+        dna_metrics = st.columns(3)
+        dna_metrics[0].metric("Pace", pace)
+        dna_metrics[1].metric("Captions", caption_weight)
+        dna_metrics[2].metric("Motion", motion_energy)
+        st.download_button(
+            "Descargar style_dna.json",
+            data=_json_bytes(style_dna),
+            file_name="style_dna.json",
+            mime="application/json",
+            use_container_width=True,
+            key="dl_style_dna_json",
+        )
+        st.json(style_dna, expanded=False)
+
+    with tab_scene_builder:
+        scene_left, scene_right = st.columns([0.9, 1.1])
+        with scene_left:
+            scene_count = st.number_input("Número de escenas", min_value=1, max_value=12, value=4, step=1, key="scene_count")
+            scene_platform = st.selectbox("Plataforma", options=ALL_PLATFORMS, key="scene_platform")
+            scene_goal = st.selectbox(
+                "Objetivo de la pieza",
+                ["Captar atención", "Explicar una idea", "Mostrar prueba", "Vender una oferta", "Reforzar autoridad"],
+                key="scene_goal",
+            )
+            scene_hook = st.selectbox(
+                "Hook inicial",
+                ["Pregunta directa", "Frase controversial", "Resultado primero", "Dolor del cliente", "Dato inesperado"],
+                key="scene_hook",
+            )
+        with scene_right:
+            st.markdown("**Blueprint de escenas**")
+            st.caption(
+                "Este esquema está pensado para conectarse después con transcripción, raw clips y marcadores de Premiere/Resolve."
+            )
+
+        scene_rows = _scene_builder_rows(int(scene_count), scene_platform, scene_goal, scene_hook)
+        scene_df = pd.DataFrame(scene_rows)
+        st.dataframe(scene_df, use_container_width=True, hide_index=True)
+        scene_downloads = st.columns(2)
+        with scene_downloads[0]:
+            st.download_button(
+                "Descargar scene_builder.json",
+                data=_json_bytes(scene_rows),
+                file_name="scene_builder.json",
+                mime="application/json",
+                use_container_width=True,
+                key="dl_scene_builder_json",
+            )
+        with scene_downloads[1]:
+            st.download_button(
+                "Descargar scene_builder.csv",
+                data=scene_df.to_csv(index=False).encode("utf-8"),
+                file_name="scene_builder.csv",
+                mime="text/csv",
+                use_container_width=True,
+                key="dl_scene_builder_csv",
+            )
+
+    with tab_assets_library:
+        assets_left, assets_right = st.columns([1.05, 0.95])
+        with assets_left:
+            uploaded_assets = st.file_uploader(
+                "Agregar assets al manifiesto",
+                accept_multiple_files=True,
+                key="asset_uploads",
+            )
+        with assets_right:
+            asset_role = st.selectbox(
+                "Rol por defecto",
+                ["Branding", "Raw clip", "B-roll", "Audio", "Subtitle preset", "Reference", "Export"],
+                key="asset_role",
+            )
+            asset_stage = st.selectbox(
+                "Etapa",
+                ["Intake", "Editing", "Review", "Delivery", "Archive"],
+                key="asset_stage",
+            )
+            st.caption("El manifiesto no mueve archivos todavía; prepara la estructura para la fase de asset management.")
+
+        asset_rows = _asset_manifest_rows(uploaded_assets, asset_role, asset_stage)
+        if asset_rows:
+            assets_df = pd.DataFrame(asset_rows)
+        else:
+            assets_df = pd.DataFrame([
+                {
+                    "asset": "logo_primary.svg",
+                    "role": "Branding",
+                    "stage": "Intake",
+                    "mime": "image/svg+xml",
+                    "size_kb": 18.4,
+                    "usage_note": "Example manifest row. Upload files to replace this template.",
+                }
+            ])
+        st.dataframe(assets_df, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Descargar ai_assets_manifest.json",
+            data=_json_bytes(assets_df.to_dict(orient="records")),
+            file_name="ai_assets_manifest.json",
+            mime="application/json",
+            use_container_width=True,
+            key="dl_assets_manifest_json",
+        )
+
 
 with tab_new_project:
     # ── Template card ─────────────────────────────────────────────────────────────
