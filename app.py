@@ -419,7 +419,9 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-tab_dashboard, tab_new_project = st.tabs(["Creative Flow", "Nuevo proyecto"])
+tab_dashboard, tab_new_project, tab_edit_plan = st.tabs(
+    ["Creative Flow", "Nuevo proyecto", "Edit Plan"]
+)
 
 with tab_dashboard:
     # ── Project Dashboard ──────────────────────────────────────────────────────────
@@ -592,6 +594,111 @@ with tab_dashboard:
 
     st.divider()
 
+with tab_edit_plan:
+    st.markdown("### Edit Plan")
+    st.caption(
+        "Prepara timestamps, goals, hooks y notas creativas para generar edit_plan.csv, "
+        "edit_plan.md, edit_plan.json y markers.csv al crear un proyecto."
+    )
+
+    ep_enabled = st.toggle(
+        "Activar generación de Edit Plan",
+        value=False,
+        key="ep_enabled",
+        help="Genera edit_plan.csv / .md / .json y markers.csv con los datos de cada clip.",
+    )
+
+    if ep_enabled:
+        ep_mode = st.radio(
+            "Modo",
+            ["Placeholder (vacío)", "Manual (ingresar datos ahora)"],
+            horizontal=True,
+            key="ep_mode",
+        )
+
+        ep_num_clips = int(st.session_state.get(K["clips"], 5))
+        ep_platforms = st.session_state.get(K["platforms"], [])
+        ep_formats = st.session_state.get(K["formats"], [])
+
+        if "Placeholder" in ep_mode:
+            st.info(
+                "Se generará un edit plan vacío con todos los entregables. "
+                "Rellena los timecodes y datos creativos en `10_Admin/edit_plan.csv` "
+                "después de generar el proyecto.",
+                icon="ℹ️",
+            )
+            if ep_platforms and ep_formats:
+                total_ep = ep_num_clips * len(ep_platforms) * len(ep_formats)
+                st.caption(f"Se crearán **{total_ep} filas** — una por entregable.")
+
+        else:
+            if ep_num_clips > 15:
+                st.warning(
+                    "El modo manual está optimizado para proyectos de hasta 15 clips. "
+                    "Para proyectos grandes usa el modo Placeholder y rellena el CSV después.",
+                    icon="⚠️",
+                )
+
+            st.caption(
+                "Introduce los datos de cada clip. El mismo timecode y goal se aplica "
+                "a todos los formatos de ese clip."
+            )
+
+            for clip_n in range(1, min(ep_num_clips + 1, 16)):
+                clip_id = f"Clip{clip_n:02d}"
+                with st.expander(f"📎 {clip_id}", expanded=(clip_n == 1)):
+                    mc1, mc2, mc3 = st.columns(3)
+
+                    with mc1:
+                        st.markdown("**Timecodes**")
+                        ep_start = st.text_input(
+                            "Start TC",
+                            placeholder="00:00:10:00",
+                            key=f"ep_start_{clip_id}",
+                        )
+                        ep_end = st.text_input(
+                            "End TC",
+                            placeholder="00:01:25:00",
+                            key=f"ep_end_{clip_id}",
+                        )
+                        if ep_start or ep_end:
+                            valid, err = validate_timecodes(ep_start, ep_end)
+                            if valid and ep_start and ep_end:
+                                dur = calculate_duration(ep_start, ep_end)
+                                if dur:
+                                    secs = timecode_to_seconds(dur)
+                                    st.caption(f"⏱ {dur}  (~{int(secs)}s)")
+                            elif not valid:
+                                st.error(err)
+
+                    with mc2:
+                        st.markdown("**Creatividad**")
+                        st.text_input(
+                            "Goal",
+                            placeholder="brand awareness / engagement / conversion",
+                            key=f"ep_goal_{clip_id}",
+                        )
+                        st.text_input(
+                            "Hook",
+                            placeholder="Frase de apertura (máx 15 palabras)",
+                            key=f"ep_hook_{clip_id}",
+                        )
+                        st.text_input(
+                            "Título",
+                            placeholder="Título sugerido",
+                            key=f"ep_title_{clip_id}",
+                        )
+
+                    with mc3:
+                        st.markdown("**Copy**")
+                        st.text_input("CTA", placeholder="Call to action", key=f"ep_cta_{clip_id}")
+                        st.text_area(
+                            "Notas",
+                            placeholder="Instrucciones para el editor",
+                            key=f"ep_notes_{clip_id}",
+                            height=130,
+                        )
+
 with tab_new_project:
     # ── Template card ─────────────────────────────────────────────────────────────
 
@@ -729,91 +836,6 @@ with tab_new_project:
                     st.markdown(f"  ✓ `{f}`")
 
         st.divider()
-
-    # ── Edit Plan ─────────────────────────────────────────────────────────────────
-
-    with st.expander("📝 Edit Plan  —  timestamps, goals y hooks por clip", expanded=False):
-        ep_enabled = st.toggle(
-            "Activar generación de Edit Plan",
-            value=False,
-            key="ep_enabled",
-            help="Genera edit_plan.csv / .md / .json y markers.csv con los datos de cada clip.",
-        )
-
-        if ep_enabled:
-            ep_mode = st.radio(
-                "Modo",
-                ["Placeholder (vacío)", "Manual (ingresar datos ahora)"],
-                horizontal=True,
-                key="ep_mode",
-            )
-
-            if "Placeholder" in ep_mode:
-                st.info(
-                    "Se generará un edit plan vacío con todos los entregables. "
-                    "Rellena los timecodes y datos creativos en `10_Admin/edit_plan.csv` "
-                    "después de generar el proyecto.",
-                    icon="ℹ️",
-                )
-                if platforms and formats:
-                    total_ep = int(num_clips) * len(platforms) * len(formats)
-                    st.caption(f"Se crearán **{total_ep} filas** — una por entregable.")
-
-            else:  # Manual mode
-                if int(num_clips) > 15:
-                    st.warning(
-                        "El modo manual está optimizado para proyectos de hasta 15 clips. "
-                        "Para proyectos grandes usa el modo Placeholder y rellena el CSV después.",
-                        icon="⚠️",
-                    )
-
-                st.caption(
-                    "Introduce los datos de cada clip. El mismo timecode y goal se aplica "
-                    "a todos los formatos de ese clip."
-                )
-
-                for clip_n in range(1, min(int(num_clips) + 1, 16)):
-                    clip_id = f"Clip{clip_n:02d}"
-                    with st.expander(f"📎 {clip_id}", expanded=(clip_n == 1)):
-                        mc1, mc2, mc3 = st.columns(3)
-
-                        with mc1:
-                            st.markdown("**Timecodes**")
-                            ep_start = st.text_input(
-                                "Start TC",
-                                placeholder="00:00:10:00",
-                                key=f"ep_start_{clip_id}",
-                            )
-                            ep_end = st.text_input(
-                                "End TC",
-                                placeholder="00:01:25:00",
-                                key=f"ep_end_{clip_id}",
-                            )
-                            if ep_start or ep_end:
-                                valid, err = validate_timecodes(ep_start, ep_end)
-                                if valid and ep_start and ep_end:
-                                    dur = calculate_duration(ep_start, ep_end)
-                                    if dur:
-                                        secs = timecode_to_seconds(dur)
-                                        st.caption(f"⏱ {dur}  (~{int(secs)}s)")
-                                elif not valid:
-                                    st.error(err)
-
-                        with mc2:
-                            st.markdown("**Creatividad**")
-                            st.text_input("Goal",   placeholder="brand awareness / engagement / conversion",
-                                          key=f"ep_goal_{clip_id}")
-                            st.text_input("Hook",   placeholder="Frase de apertura (máx 15 palabras)",
-                                          key=f"ep_hook_{clip_id}")
-                            st.text_input("Título", placeholder="Título sugerido",
-                                          key=f"ep_title_{clip_id}")
-
-                        with mc3:
-                            st.markdown("**Copy**")
-                            st.text_input("CTA",   placeholder="Call to action",
-                                          key=f"ep_cta_{clip_id}")
-                            st.text_area("Notas",  placeholder="Instrucciones para el editor",
-                                         key=f"ep_notes_{clip_id}", height=130)
 
     generate = st.button("✂️ Generar proyecto", type="primary", use_container_width=True)
 
