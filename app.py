@@ -541,6 +541,13 @@ ADMIN_FILES = [
     "editor_instructions.md",
     "prompts_ai.md",
     "project_config.json",
+    "brand_memory.json",
+    "brand_memory.md",
+    "prompt_remix.json",
+    "style_dna.json",
+    "scene_builder.csv",
+    "scene_builder.json",
+    "ai_assets_manifest.json",
     "README.md",
     "scalecut_package.zip",
 ]
@@ -702,6 +709,25 @@ def _asset_manifest_rows(uploaded_files, default_role: str, default_stage: str) 
         })
     return rows
 
+
+def _write_ai_studio_files(
+    root: Path,
+    brand_profile: dict,
+    remix_rows: list[dict],
+    style_dna: dict,
+    scene_rows: list[dict],
+    assets_manifest: list[dict],
+) -> None:
+    admin = root / "10_Admin"
+    admin.mkdir(parents=True, exist_ok=True)
+    (admin / "brand_memory.json").write_bytes(_json_bytes(brand_profile))
+    (admin / "brand_memory.md").write_text(_brand_memory_markdown(brand_profile), encoding="utf-8")
+    (admin / "prompt_remix.json").write_bytes(_json_bytes(remix_rows))
+    (admin / "style_dna.json").write_bytes(_json_bytes(style_dna))
+    (admin / "scene_builder.json").write_bytes(_json_bytes(scene_rows))
+    pd.DataFrame(scene_rows).to_csv(admin / "scene_builder.csv", index=False, encoding="utf-8")
+    (admin / "ai_assets_manifest.json").write_bytes(_json_bytes(assets_manifest))
+
 # ── Session state keys ────────────────────────────────────────────────────────
 
 K = dict(
@@ -807,9 +833,12 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-tab_dashboard, tab_new_project, tab_edit_plan, tab_ai_studio = st.tabs(
-    ["Creative Flow", "Nuevo proyecto", "Edit Plan", "AI Studio"]
-)
+tab_dashboard, tab_studio = st.tabs(["Creative Flow", "Studio"])
+
+with tab_studio:
+    tab_new_project, tab_ai_studio, tab_edit_plan = st.tabs(
+        ["Proyecto", "Creative Intelligence", "Edit Plan"]
+    )
 
 with tab_dashboard:
     # ── Project Dashboard ──────────────────────────────────────────────────────────
@@ -1128,9 +1157,9 @@ with tab_edit_plan:
                         )
 
 with tab_ai_studio:
-    st.markdown("### AI Studio")
+    st.markdown("### Creative Intelligence")
     st.caption(
-        "Un workspace para convertir la estructura de ScaleCut en dirección creativa: marca, prompts, estilo, escenas y assets."
+        "Define la inteligencia creativa que se guardará con el proyecto: marca, prompts, estilo, escenas y assets."
     )
 
     studio_client = st.session_state.get(K["client"], "").strip() or "Cliente activo"
@@ -1707,6 +1736,15 @@ with tab_new_project:
                     write_edit_plan_json(ep_clips, root, config, mode=ep_json_mode)
                     write_markers_csv(ep_clips, root)
 
+                _write_ai_studio_files(
+                    root,
+                    brand_profile,
+                    remix_rows,
+                    style_dna,
+                    scene_rows,
+                    assets_df.to_dict(orient="records"),
+                )
+
                 zip_bytes = create_zip(root)
 
             st.session_state["config"]       = config
@@ -1850,6 +1888,13 @@ with tab_new_project:
                 (root / "10_Admin" / "editor_instructions.md",  "text/markdown",    "Instrucciones completas para Premiere / Resolve"),
                 (root / "10_Admin" / "prompts_ai.md",           "text/markdown",    "6 prompts de IA listos para usar"),
                 (root / "10_Admin" / "project_config.json",     "application/json", "Datos completos del proyecto (JSON)"),
+                (root / "10_Admin" / "brand_memory.json",       "application/json", "Perfil de marca para prompts, subtítulos y exports"),
+                (root / "10_Admin" / "brand_memory.md",         "text/markdown",    "Brand Memory legible para revisión creativa"),
+                (root / "10_Admin" / "prompt_remix.json",       "application/json", "Variantes de prompt por plataforma"),
+                (root / "10_Admin" / "style_dna.json",          "application/json", "Perfil de ritmo, captions y motion"),
+                (root / "10_Admin" / "scene_builder.csv",       "text/csv",         "Blueprint de escenas para edición"),
+                (root / "10_Admin" / "scene_builder.json",      "application/json", "Blueprint de escenas para integraciones AI"),
+                (root / "10_Admin" / "ai_assets_manifest.json", "application/json", "Manifiesto de assets creativos"),
                 (root / "README.md",                            "text/markdown",    "Briefing del proyecto"),
             ]
 
