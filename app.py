@@ -48,22 +48,32 @@ st.markdown(
     <style>
     :root {
         --sc-midnight: #070B16;
-        --sc-panel: rgba(17, 24, 39, 0.74);
-        --sc-panel-strong: rgba(24, 32, 49, 0.88);
-        --sc-line: rgba(236, 241, 255, 0.12);
+        --sc-panel: rgba(16, 22, 35, 0.86);
+        --sc-panel-strong: rgba(24, 31, 47, 0.94);
+        --sc-panel-soft: rgba(246, 240, 230, 0.045);
+        --sc-line: rgba(236, 241, 255, 0.13);
+        --sc-line-strong: rgba(246, 240, 230, 0.2);
         --sc-ivory: #F6F0E6;
         --sc-muted: #A9B2C7;
+        --sc-muted-strong: #C7D0E3;
         --sc-teal: #2EE9D0;
         --sc-violet: #9B8CFF;
         --sc-coral: #FF8B70;
         --sc-green: #7BE7A7;
+        --sc-ink: #06101A;
+        --sc-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+        --sc-ease-press: cubic-bezier(0.25, 1, 0.5, 1);
+        --sc-shadow-panel: 0 18px 46px rgba(2, 8, 23, 0.34);
+        --sc-shadow-control: 0 10px 24px rgba(46, 233, 208, 0.14);
     }
 
     [data-testid="stAppViewContainer"] {
         background:
-            radial-gradient(circle at 18% 12%, rgba(46, 233, 208, 0.14), transparent 28rem),
-            radial-gradient(circle at 82% 2%, rgba(155, 140, 255, 0.16), transparent 24rem),
+            radial-gradient(circle at 18% 10%, rgba(46, 233, 208, 0.11), transparent 24rem),
+            radial-gradient(circle at 88% 0%, rgba(155, 140, 255, 0.1), transparent 22rem),
+            linear-gradient(90deg, rgba(246, 240, 230, 0.025) 1px, transparent 1px),
             linear-gradient(180deg, #07111E 0%, var(--sc-midnight) 42%, #050711 100%);
+        background-size: auto, auto, 64px 64px, auto;
         color: var(--sc-ivory);
     }
 
@@ -78,7 +88,7 @@ st.markdown(
 
     .main .block-container {
         max-width: 1480px;
-        padding-top: 3rem;
+        padding-top: 2.4rem;
         padding-bottom: 5rem;
     }
 
@@ -90,22 +100,37 @@ st.markdown(
     h1, h2, h3 {
         letter-spacing: 0;
         color: var(--sc-ivory);
+        text-wrap: balance;
     }
 
     p, label, span, div {
         letter-spacing: 0;
     }
 
+    body, .stApp {
+        font-variant-numeric: tabular-nums;
+    }
+
     .sc-hero {
-        border: 1px solid rgba(246, 240, 230, 0.14);
+        border: 1px solid var(--sc-line);
         background:
-            linear-gradient(135deg, rgba(246, 240, 230, 0.08), rgba(246, 240, 230, 0.03)),
-            rgba(11, 16, 28, 0.72);
-        border-radius: 18px;
-        padding: 28px 30px;
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
-        backdrop-filter: blur(18px);
-        margin-bottom: 28px;
+            linear-gradient(135deg, rgba(246, 240, 230, 0.075), rgba(246, 240, 230, 0.025)),
+            var(--sc-panel);
+        border-radius: 16px;
+        padding: 26px 28px 24px;
+        box-shadow: var(--sc-shadow-panel);
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sc-hero:after {
+        content: "";
+        position: absolute;
+        inset: 1px;
+        border-radius: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.035);
+        pointer-events: none;
     }
 
     .sc-hero-top {
@@ -125,12 +150,12 @@ st.markdown(
     .sc-mark {
         width: 44px;
         height: 44px;
-        border-radius: 14px;
+        border-radius: 13px;
         background:
             linear-gradient(135deg, rgba(46, 233, 208, 0.95), rgba(155, 140, 255, 0.9)),
             #101827;
         position: relative;
-        box-shadow: 0 14px 36px rgba(46, 233, 208, 0.18);
+        box-shadow: 0 12px 30px rgba(46, 233, 208, 0.16);
     }
 
     .sc-mark:before,
@@ -151,16 +176,16 @@ st.markdown(
     .sc-kicker {
         color: var(--sc-teal);
         font-size: 12px;
-        font-weight: 700;
+        font-weight: 750;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         margin-bottom: 4px;
     }
 
     .sc-title {
-        font-size: clamp(32px, 4vw, 58px);
+        font-size: clamp(32px, 4vw, 54px);
         font-weight: 800;
-        line-height: 1;
+        line-height: 1.03;
         color: var(--sc-ivory);
         margin: 0;
     }
@@ -184,7 +209,7 @@ st.markdown(
         border: 1px solid rgba(246, 240, 230, 0.14);
         border-radius: 999px;
         color: var(--sc-ivory);
-        background: rgba(246, 240, 230, 0.06);
+        background: rgba(246, 240, 230, 0.055);
         padding: 8px 12px;
         font-size: 12px;
         white-space: nowrap;
@@ -192,7 +217,7 @@ st.markdown(
 
     .sc-preview {
         border: 1px solid rgba(46, 233, 208, 0.22);
-        border-radius: 14px;
+        border-radius: 12px;
         background: rgba(4, 9, 18, 0.58);
         padding: 14px 16px;
         color: var(--sc-teal);
@@ -202,9 +227,15 @@ st.markdown(
 
     div[data-testid="stExpander"] {
         border: 1px solid rgba(246, 240, 230, 0.14);
-        border-radius: 16px;
-        background: rgba(13, 18, 31, 0.68);
-        box-shadow: 0 18px 52px rgba(0, 0, 0, 0.22);
+        border-radius: 14px;
+        background: var(--sc-panel);
+        box-shadow: 0 12px 32px rgba(2, 8, 23, 0.24);
+        transition: border-color 180ms var(--sc-ease-out), background 180ms var(--sc-ease-out);
+    }
+
+    div[data-testid="stExpander"]:hover {
+        border-color: rgba(246, 240, 230, 0.24);
+        background: var(--sc-panel-strong);
     }
 
     div[data-testid="stExpander"] details > summary {
@@ -214,12 +245,26 @@ st.markdown(
     button[data-baseweb="tab"] {
         border-radius: 999px;
         color: var(--sc-muted);
-        font-weight: 800;
+        font-weight: 750;
         padding: 10px 18px;
+        transition:
+            background 180ms var(--sc-ease-out),
+            color 180ms var(--sc-ease-out),
+            transform 120ms var(--sc-ease-press);
+    }
+
+    button[data-baseweb="tab"]:hover {
+        background: rgba(246, 240, 230, 0.055);
+        color: var(--sc-muted-strong);
+    }
+
+    button[data-baseweb="tab"]:active {
+        transform: scale(0.98);
     }
 
     button[data-baseweb="tab"][aria-selected="true"] {
-        background: rgba(46, 233, 208, 0.13);
+        background: rgba(46, 233, 208, 0.14);
+        box-shadow: inset 0 0 0 1px rgba(46, 233, 208, 0.22);
         color: var(--sc-ivory);
     }
 
@@ -232,15 +277,16 @@ st.markdown(
 
     div[data-testid="stDataFrame"] {
         border: 1px solid var(--sc-line);
-        border-radius: 14px;
+        border-radius: 12px;
         overflow: hidden;
     }
 
     div[data-testid="stMetric"] {
         border: 1px solid rgba(246, 240, 230, 0.12);
-        border-radius: 14px;
-        background: rgba(246, 240, 230, 0.045);
+        border-radius: 12px;
+        background: var(--sc-panel-soft);
         padding: 14px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
     }
 
     .stButton > button,
@@ -248,24 +294,66 @@ st.markdown(
         border: 0;
         border-radius: 12px;
         background: linear-gradient(135deg, var(--sc-teal), var(--sc-violet));
-        color: #06101A;
+        color: var(--sc-ink);
         font-weight: 800;
-        box-shadow: 0 14px 32px rgba(46, 233, 208, 0.16);
+        box-shadow: var(--sc-shadow-control);
+        transition:
+            transform 120ms var(--sc-ease-press),
+            box-shadow 180ms var(--sc-ease-out),
+            filter 180ms var(--sc-ease-out);
     }
 
     .stButton > button:hover,
     .stDownloadButton > button:hover {
-        color: #06101A;
+        color: var(--sc-ink);
         filter: brightness(1.05);
         transform: translateY(-1px);
+        box-shadow: 0 14px 30px rgba(46, 233, 208, 0.2);
+    }
+
+    .stButton > button:active,
+    .stDownloadButton > button:active {
+        transform: translateY(0) scale(0.98);
+        box-shadow: 0 8px 18px rgba(46, 233, 208, 0.14);
     }
 
     input, textarea, div[data-baseweb="select"] > div {
         border-radius: 12px !important;
+        transition:
+            border-color 180ms var(--sc-ease-out),
+            box-shadow 180ms var(--sc-ease-out),
+            background 180ms var(--sc-ease-out);
+    }
+
+    input:focus, textarea:focus {
+        border-color: rgba(46, 233, 208, 0.68) !important;
+        box-shadow: 0 0 0 3px rgba(46, 233, 208, 0.16) !important;
+    }
+
+    div[data-baseweb="select"] > div:focus-within {
+        border-color: rgba(46, 233, 208, 0.68) !important;
+        box-shadow: 0 0 0 3px rgba(46, 233, 208, 0.16) !important;
+    }
+
+    button:focus-visible,
+    a:focus-visible {
+        outline: 2px solid rgba(46, 233, 208, 0.85) !important;
+        outline-offset: 3px !important;
     }
 
     hr {
         border-color: rgba(246, 240, 230, 0.1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
     }
     </style>
     """,
