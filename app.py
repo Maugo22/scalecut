@@ -356,31 +356,25 @@ st.markdown(
         font-size: 12px;
     }
 
-    .sc-swatch-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin: 8px 0 2px;
-        padding: 8px;
-        border: 1px solid rgba(246, 240, 230, 0.1);
-        border-radius: 12px;
-        background: rgba(246, 240, 230, 0.035);
-    }
-
-    .sc-swatch {
-        width: 82px;
+    .sc-palette-token {
+        min-width: 78px;
         border-radius: 10px;
         border: 1px solid rgba(246, 240, 230, 0.12);
         background: rgba(5, 9, 18, 0.54);
         overflow: hidden;
     }
 
-    .sc-swatch-color {
-        height: 24px;
+    .sc-picker-token {
+        margin-top: 5px;
+        margin-bottom: 8px;
+    }
+
+    .sc-palette-color {
+        height: 22px;
         border-bottom: 1px solid rgba(246, 240, 230, 0.12);
     }
 
-    .sc-swatch-label {
+    .sc-palette-hex {
         padding: 5px 7px;
         color: var(--sc-muted-strong);
         font: 650 10px/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -1370,35 +1364,30 @@ with tab_ai_studio:
                 )
             default_palette = ["#2EE9D0", "#9B8CFF", "#FF8B70", "#F6F0E6", "#070B16"]
             bm_colors = []
-            for row_start in range(0, int(bm_palette_size), 4):
-                color_cols = st.columns([1, 1, 1, 1, 4])
-                for offset, color_col in enumerate(color_cols[:4]):
+            for row_start in range(0, int(bm_palette_size), 3):
+                color_cols = st.columns([0.7, 0.7, 0.7, 5])
+                for offset, color_col in enumerate(color_cols[:3]):
                     color_idx = row_start + offset
                     if color_idx >= int(bm_palette_size):
                         continue
                     with color_col:
                         fallback = default_palette[color_idx % len(default_palette)]
-                        bm_colors.append(
-                            st.color_picker(
-                                f"Color {color_idx + 1}",
-                                value=fallback,
-                                key=f"bm_color_{color_idx}",
-                            )
+                        color_value = st.color_picker(
+                            f"Color {color_idx + 1}",
+                            value=fallback,
+                            key=f"bm_color_{color_idx}",
+                            label_visibility="collapsed",
                         )
-
-            swatches = "".join(
-                (
-                    '<div class="sc-swatch">'
-                    f'<div class="sc-swatch-color" style="background:{_html(color)};"></div>'
-                    f'<div class="sc-swatch-label">{_html(color.upper())}</div>'
-                    "</div>"
-                )
-                for color in bm_colors
-            )
-            st.markdown(
-                f'<div class="sc-swatch-row" aria-label="Brand color preview">{swatches}</div>',
-                unsafe_allow_html=True,
-            )
+                        bm_colors.append(color_value)
+                        st.markdown(
+                            (
+                                '<div class="sc-palette-token sc-picker-token">'
+                                f'<div class="sc-palette-color" style="background:{_html(color_value)};"></div>'
+                                f'<div class="sc-palette-hex">{color_idx + 1} · {_html(color_value.upper())}</div>'
+                                "</div>"
+                            ),
+                            unsafe_allow_html=True,
+                        )
         with bm_right:
             bm_logo_notes = st.text_area(
                 "Reglas de logo y branding",
