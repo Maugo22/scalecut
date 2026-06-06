@@ -556,20 +556,60 @@ with tab_dashboard:
                 st.info("No hay entregables disponibles en el checklist.")
                 selected_deliverable = None
             else:
-                selected_deliverable_idx = st.selectbox(
-                    "Entregable",
-                    options=range(len(deliverables)),
-                    format_func=lambda i: _deliverable_label(deliverables[i]),
-                    key="up_deliverable",
-                )
-                selected_deliverable = deliverables[selected_deliverable_idx]
+                filter_c1, filter_c2, filter_c3 = st.columns(3)
+                with filter_c1:
+                    status_filter = st.selectbox(
+                        "Filtrar status",
+                        options=["Todos", *STATUSES],
+                        key="up_filter_status",
+                    )
+                with filter_c2:
+                    platform_options = sorted(
+                        {row.get("Platform", "") for row in deliverables if row.get("Platform")}
+                    )
+                    platform_filter = st.selectbox(
+                        "Filtrar plataforma",
+                        options=["Todas"] + platform_options,
+                        key="up_filter_platform",
+                    )
+                with filter_c3:
+                    format_options = sorted(
+                        {row.get("Format", "") for row in deliverables if row.get("Format")}
+                    )
+                    format_filter = st.selectbox(
+                        "Filtrar formato",
+                        options=["Todos"] + format_options,
+                        key="up_filter_format",
+                    )
 
-            up_c1, up_c2 = st.columns([2, 1])
-            with up_c1:
-                if selected_deliverable:
-                    st.caption(f"Archivo: `{selected_deliverable.get('Filename', '—')}`")
-            with up_c2:
-                up_status = st.selectbox("Nuevo status", options=STATUSES, key="up_status")
+                filtered_deliverables = [
+                    row for row in deliverables
+                    if (status_filter == "Todos" or row.get("Status") == status_filter)
+                    and (platform_filter == "Todas" or row.get("Platform") == platform_filter)
+                    and (format_filter == "Todos" or row.get("Format") == format_filter)
+                ]
+
+                st.caption(
+                    f"Mostrando **{len(filtered_deliverables)}** de "
+                    f"**{len(deliverables)}** entregables"
+                )
+
+                if not filtered_deliverables:
+                    st.info("No hay entregables que coincidan con esos filtros.")
+                    selected_deliverable = None
+                else:
+                    selected_deliverable_idx = st.selectbox(
+                        "Entregable",
+                        options=range(len(filtered_deliverables)),
+                        format_func=lambda i: _deliverable_label(filtered_deliverables[i]),
+                        key="up_deliverable",
+                    )
+                    selected_deliverable = filtered_deliverables[selected_deliverable_idx]
+
+            if selected_deliverable:
+                st.caption(f"Archivo: `{selected_deliverable.get('Filename', '—')}`")
+
+            up_status = st.selectbox("Nuevo status", options=STATUSES, key="up_status")
 
             if st.button("💾 Actualizar status", key="up_submit"):
                 if not selected_deliverable:
