@@ -359,27 +359,38 @@ st.markdown(
     .sc-swatch-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
-        margin: 10px 0 4px;
+        gap: 8px;
+        margin: 8px 0 2px;
+        padding: 8px;
+        border: 1px solid rgba(246, 240, 230, 0.1);
+        border-radius: 12px;
+        background: rgba(246, 240, 230, 0.035);
     }
 
     .sc-swatch {
-        min-width: 116px;
-        border-radius: 12px;
+        width: 82px;
+        border-radius: 10px;
         border: 1px solid rgba(246, 240, 230, 0.12);
-        background: rgba(246, 240, 230, 0.04);
+        background: rgba(5, 9, 18, 0.54);
         overflow: hidden;
     }
 
     .sc-swatch-color {
-        height: 42px;
+        height: 24px;
         border-bottom: 1px solid rgba(246, 240, 230, 0.12);
     }
 
     .sc-swatch-label {
-        padding: 7px 9px;
+        padding: 5px 7px;
         color: var(--sc-muted-strong);
-        font: 650 12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font: 650 10px/1.25 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        text-align: center;
+    }
+
+    .sc-mini-note {
+        color: var(--sc-muted);
+        font-size: 12px;
+        margin: -2px 0 8px;
     }
 
     @media (max-width: 980px) {
@@ -492,6 +503,25 @@ st.markdown(
     .stDownloadButton > button:active {
         transform: translateY(0) scale(0.98);
         box-shadow: 0 8px 18px rgba(46, 233, 208, 0.14);
+    }
+
+    .stDownloadButton > button {
+        min-height: 42px;
+        border: 1px solid rgba(46, 233, 208, 0.26);
+        background:
+            linear-gradient(180deg, rgba(46, 233, 208, 0.16), rgba(155, 140, 255, 0.12)),
+            rgba(8, 13, 24, 0.82);
+        color: var(--sc-ivory);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+
+    .stDownloadButton > button:hover {
+        color: var(--sc-ivory);
+        filter: none;
+        border-color: rgba(46, 233, 208, 0.42);
+        background:
+            linear-gradient(180deg, rgba(46, 233, 208, 0.22), rgba(155, 140, 255, 0.16)),
+            rgba(10, 18, 32, 0.92);
     }
 
     input, textarea, div[data-baseweb="select"] > div {
@@ -1321,20 +1351,28 @@ with tab_ai_studio:
                 key="bm_audience",
                 height=92,
             )
-            bm_palette_size = st.number_input(
-                "Colores de marca",
-                min_value=1,
-                max_value=8,
-                value=3,
-                step=1,
-                key="bm_palette_size",
-                help="Cada selector permite elegir en rueda o escribir el HEX.",
-            )
+            palette_count_col, palette_note_col = st.columns([1, 3])
+            with palette_count_col:
+                bm_palette_size = st.number_input(
+                    "Colores",
+                    min_value=1,
+                    max_value=8,
+                    value=3,
+                    step=1,
+                    key="bm_palette_size",
+                    help="Cada selector permite elegir en rueda o escribir el HEX.",
+                )
+            with palette_note_col:
+                st.markdown(
+                    '<div class="sc-mini-note">Elige en rueda o escribe HEX. '
+                    'El preview muestra la paleta que se guardará.</div>',
+                    unsafe_allow_html=True,
+                )
             default_palette = ["#2EE9D0", "#9B8CFF", "#FF8B70", "#F6F0E6", "#070B16"]
             bm_colors = []
             for row_start in range(0, int(bm_palette_size), 4):
-                color_cols = st.columns(4)
-                for offset, color_col in enumerate(color_cols):
+                color_cols = st.columns([1, 1, 1, 1, 4])
+                for offset, color_col in enumerate(color_cols[:4]):
                     color_idx = row_start + offset
                     if color_idx >= int(bm_palette_size):
                         continue
