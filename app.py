@@ -602,6 +602,20 @@ ADMIN_FILES = [
     "scalecut_package.zip",
 ]
 
+BM_VOICE_OPTIONS = [
+    "Precisa, premium y calmada",
+    "Directa, social y energética",
+    "Educativa, clara y confiable",
+    "Editorial, sofisticada y sobria",
+]
+
+BM_SUBTITLE_STYLE_OPTIONS = [
+    "Clean bold lower third",
+    "Kinetic captions con énfasis por palabra clave",
+    "Editorial minimal con alto contraste",
+    "Social native con highlights de color",
+]
+
 
 def _load_dashboard_deliverables(project_path) -> list[dict]:
     checklist = Path(project_path) / "10_Admin" / "delivery_checklist.csv"
@@ -621,6 +635,15 @@ def _json_bytes(payload: dict | list[dict]) -> bytes:
 
 def _html(value) -> str:
     return html.escape(str(value or "—"))
+
+
+def _normalize_hex_color(value, fallback: str = "#2EE9D0") -> str:
+    raw = str(value or "").strip()
+    if raw and not raw.startswith("#"):
+        raw = f"#{raw}"
+    if len(raw) == 7 and all(ch in "0123456789abcdefABCDEF" for ch in raw[1:]):
+        return raw.upper()
+    return fallback
 
 
 def _brand_memory_payload(
@@ -1318,6 +1341,55 @@ with tab_ai_studio:
     ])
 
     with tab_brand_memory:
+        with st.expander("Cargar Brand Memory existente"):
+            imported_bm = st.file_uploader(
+                "Importar brand_memory.json",
+                type=["json"],
+                key="bm_import_file",
+                help="Carga un perfil de marca anterior. Se aplican datos creativos, pero el contexto del proyecto actual se conserva.",
+            )
+            if imported_bm is not None:
+                try:
+                    imported_profile = json.loads(imported_bm.getvalue().decode("utf-8"))
+                    imported_colors = [
+                        _normalize_hex_color(color)
+                        for color in imported_profile.get("colors", [])
+                    ][:8]
+                    st.caption(
+                        "Perfil detectado: "
+                        f"**{imported_profile.get('client', 'Sin cliente')}** · "
+                        f"{len(imported_colors)} color(es)"
+                    )
+                    if st.button("Aplicar Brand Memory", key="bm_apply_import"):
+                        imported_voice = imported_profile.get("voice", BM_VOICE_OPTIONS[0])
+                        imported_subtitle_style = imported_profile.get(
+                            "subtitle_style", BM_SUBTITLE_STYLE_OPTIONS[0]
+                        )
+                        st.session_state["bm_voice"] = (
+                            imported_voice if imported_voice in BM_VOICE_OPTIONS else BM_VOICE_OPTIONS[0]
+                        )
+                        st.session_state["bm_audience"] = imported_profile.get("audience", "")
+                        st.session_state["bm_logo_notes"] = imported_profile.get("logo_notes", "")
+                        st.session_state["bm_subtitle_style"] = (
+                            imported_subtitle_style
+                            if imported_subtitle_style in BM_SUBTITLE_STYLE_OPTIONS
+                            else BM_SUBTITLE_STYLE_OPTIONS[0]
+                        )
+                        st.session_state["bm_banned_terms"] = "\n".join(
+                            imported_profile.get("banned_terms", [])
+                        )
+                        st.session_state["bm_rules"] = "\n".join(
+                            imported_profile.get("brand_rules", [])
+                        )
+                        if imported_colors:
+                            st.session_state["bm_palette_size"] = len(imported_colors)
+                            for idx, color in enumerate(imported_colors):
+                                st.session_state[f"bm_color_{idx}"] = color
+                        st.success("Brand Memory aplicado a Creative Intelligence.")
+                        st.rerun()
+                except (json.JSONDecodeError, UnicodeDecodeError, AttributeError, TypeError) as exc:
+                    st.error(f"No se pudo leer el Brand Memory: {exc}")
+
         bm_left, bm_right = st.columns([1.05, 0.95])
         with bm_left:
             with st.container(border=True):
@@ -1331,12 +1403,7 @@ with tab_ai_studio:
 
             bm_voice = st.selectbox(
                 "Voz de marca",
-                [
-                    "Precisa, premium y calmada",
-                    "Directa, social y energética",
-                    "Educativa, clara y confiable",
-                    "Editorial, sofisticada y sobria",
-                ],
+                BM_VOICE_OPTIONS,
                 key="bm_voice",
             )
             bm_audience = st.text_area(
@@ -1397,12 +1464,7 @@ with tab_ai_studio:
             )
             bm_subtitle_style = st.selectbox(
                 "Estilo de subtítulos",
-                [
-                    "Clean bold lower third",
-                    "Kinetic captions con énfasis por palabra clave",
-                    "Editorial minimal con alto contraste",
-                    "Social native con highlights de color",
-                ],
+                BM_SUBTITLE_STYLE_OPTIONS,
                 key="bm_subtitle_style",
             )
             bm_banned_terms_raw = st.text_area(
