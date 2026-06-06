@@ -356,6 +356,32 @@ st.markdown(
         font-size: 12px;
     }
 
+    .sc-swatch-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 10px 0 4px;
+    }
+
+    .sc-swatch {
+        min-width: 116px;
+        border-radius: 12px;
+        border: 1px solid rgba(246, 240, 230, 0.12);
+        background: rgba(246, 240, 230, 0.04);
+        overflow: hidden;
+    }
+
+    .sc-swatch-color {
+        height: 42px;
+        border-bottom: 1px solid rgba(246, 240, 230, 0.12);
+    }
+
+    .sc-swatch-label {
+        padding: 7px 9px;
+        color: var(--sc-muted-strong);
+        font: 650 12px/1.3 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
     @media (max-width: 980px) {
         .sc-studio-grid {
             grid-template-columns: 1fr;
@@ -1295,10 +1321,45 @@ with tab_ai_studio:
                 key="bm_audience",
                 height=92,
             )
-            bm_colors_raw = st.text_input(
+            bm_palette_size = st.number_input(
                 "Colores de marca",
-                value="#2EE9D0, #9B8CFF, #FF8B70",
-                key="bm_colors",
+                min_value=1,
+                max_value=8,
+                value=3,
+                step=1,
+                key="bm_palette_size",
+                help="Cada selector permite elegir en rueda o escribir el HEX.",
+            )
+            default_palette = ["#2EE9D0", "#9B8CFF", "#FF8B70", "#F6F0E6", "#070B16"]
+            bm_colors = []
+            for row_start in range(0, int(bm_palette_size), 4):
+                color_cols = st.columns(4)
+                for offset, color_col in enumerate(color_cols):
+                    color_idx = row_start + offset
+                    if color_idx >= int(bm_palette_size):
+                        continue
+                    with color_col:
+                        fallback = default_palette[color_idx % len(default_palette)]
+                        bm_colors.append(
+                            st.color_picker(
+                                f"Color {color_idx + 1}",
+                                value=fallback,
+                                key=f"bm_color_{color_idx}",
+                            )
+                        )
+
+            swatches = "".join(
+                (
+                    '<div class="sc-swatch">'
+                    f'<div class="sc-swatch-color" style="background:{_html(color)};"></div>'
+                    f'<div class="sc-swatch-label">{_html(color.upper())}</div>'
+                    "</div>"
+                )
+                for color in bm_colors
+            )
+            st.markdown(
+                f'<div class="sc-swatch-row" aria-label="Brand color preview">{swatches}</div>',
+                unsafe_allow_html=True,
             )
         with bm_right:
             bm_logo_notes = st.text_area(
@@ -1335,7 +1396,7 @@ with tab_ai_studio:
             studio_context,
             bm_voice,
             bm_audience,
-            _split_lines(bm_colors_raw),
+            bm_colors,
             bm_logo_notes,
             bm_subtitle_style,
             _split_lines(bm_banned_terms_raw),
