@@ -575,6 +575,7 @@ def _html(value) -> str:
 
 def _brand_memory_payload(
     client: str,
+    project_context: dict,
     voice: str,
     audience: str,
     colors: list[str],
@@ -585,6 +586,7 @@ def _brand_memory_payload(
 ) -> dict:
     return {
         "client": client.strip() or "Nuevo cliente",
+        "project_context": project_context,
         "voice": voice,
         "audience": audience.strip(),
         "colors": colors,
@@ -605,7 +607,19 @@ def _brand_memory_markdown(profile: dict) -> str:
     colors = ", ".join(profile["colors"]) or "Not defined"
     banned = ", ".join(profile["banned_terms"]) or "None"
     rules = "\n".join(f"- {rule}" for rule in profile["brand_rules"]) or "- No extra rules yet"
+    context = profile.get("project_context", {})
+    platforms = ", ".join(context.get("platforms", [])) or "Not defined"
+    formats = ", ".join(context.get("formats", [])) or "Not defined"
     return f"""# Brand Memory: {profile['client']}
+
+## Project context
+- Project: {context.get('project', 'Not defined')}
+- Project type: {context.get('project_type', 'Not defined')}
+- Delivery date: {context.get('delivery_date', 'Not defined')}
+- Clips: {context.get('num_clips', 'Not defined')}
+- Platforms: {platforms}
+- Formats: {formats}
+- Version: {context.get('version', 'Not defined')}
 
 ## Voice
 {profile['voice']}
@@ -1164,9 +1178,28 @@ with tab_ai_studio:
 
     studio_client = st.session_state.get(K["client"], "").strip() or "Cliente activo"
     studio_project = st.session_state.get(K["project"], "").strip() or "Proyecto creativo"
+    studio_project_type = st.session_state.get(K["proj_type"], "")
+    studio_delivery_date = str(st.session_state.get(K["date"], date.today()))
     studio_platforms = st.session_state.get(K["platforms"], []) or ["Instagram Reels", "TikTok", "YouTube Shorts"]
     studio_formats = st.session_state.get(K["formats"], []) or ["9x16", "1x1"]
-    studio_deliverables = int(st.session_state.get(K["clips"], 5)) * len(studio_platforms) * len(studio_formats)
+    studio_num_clips = int(st.session_state.get(K["clips"], 5))
+    studio_version = str(st.session_state.get(K["version"], "01")).zfill(2)
+    studio_language = st.session_state.get(K["language"], "ES")
+    studio_initial_status = st.session_state.get(K["status"], "Not started")
+    studio_deliverables = studio_num_clips * len(studio_platforms) * len(studio_formats)
+    studio_context = {
+        "client": studio_client,
+        "project": studio_project,
+        "project_type": studio_project_type,
+        "delivery_date": studio_delivery_date,
+        "num_clips": studio_num_clips,
+        "platforms": studio_platforms,
+        "formats": studio_formats,
+        "version": studio_version,
+        "language": studio_language,
+        "initial_status": studio_initial_status,
+        "estimated_deliverables": studio_deliverables,
+    }
 
     st.markdown(
         f"""
@@ -1237,7 +1270,15 @@ with tab_ai_studio:
     with tab_brand_memory:
         bm_left, bm_right = st.columns([1.05, 0.95])
         with bm_left:
-            bm_client = st.text_input("Cliente", value=studio_client, key="bm_client")
+            with st.container(border=True):
+                st.markdown("**Contexto heredado de Proyecto**")
+                st.caption("Estos datos se actualizan desde la sección `Proyecto` y se guardan en Brand Memory.")
+                st.markdown(f"**Cliente:** {studio_client}")
+                st.markdown(f"**Proyecto:** {studio_project}")
+                st.markdown(f"**Plataformas:** {', '.join(studio_platforms)}")
+                st.markdown(f"**Formatos:** {', '.join(studio_formats)}")
+                st.caption(f"{studio_num_clips} clips · {studio_deliverables} entregables · V{studio_version}")
+
             bm_voice = st.selectbox(
                 "Voz de marca",
                 [
@@ -1290,7 +1331,8 @@ with tab_ai_studio:
             )
 
         brand_profile = _brand_memory_payload(
-            bm_client,
+            studio_client,
+            studio_context,
             bm_voice,
             bm_audience,
             _split_lines(bm_colors_raw),
@@ -1332,12 +1374,21 @@ with tab_ai_studio:
                 key="remix_core_prompt",
                 height=130,
             )
-            remix_platforms = st.multiselect(
-                "Plataformas",
-                options=ALL_PLATFORMS,
-                default=[p for p in studio_platforms if p in ALL_PLATFORMS],
-                key="remix_platforms",
+            remix_use_project_platforms = st.toggle(
+                "Usar plataformas del proyecto",
+                value=True,
+                key="remix_use_project_platforms",
             )
+            if remix_use_project_platforms:
+                remix_platforms = studio_platforms
+                st.caption(f"Sincronizado con Proyecto: **{', '.join(remix_platforms)}**")
+            else:
+                remix_platforms = st.multiselect(
+                    "Plataformas",
+                    options=ALL_PLATFORMS,
+                    default=[p for p in studio_platforms if p in ALL_PLATFORMS],
+                    key="remix_platforms",
+                )
         with remix_right:
             remix_objective = st.selectbox(
                 "Objetivo",
@@ -1429,7 +1480,10 @@ with tab_ai_studio:
         scene_left, scene_right = st.columns([0.9, 1.1])
         with scene_left:
             scene_count = st.number_input("Número de escenas", min_value=1, max_value=12, value=4, step=1, key="scene_count")
-            scene_platform = st.selectbox("Plataforma", options=ALL_PLATFORMS, key="scene_platform")
+            scene_platform_options = studio_platforms or ALL_PLATFORMS
+            if st.session_state.get("scene_platform") not in scene_platform_options:
+                st.session_state["scene_platform"] = scene_platform_options[0]
+            scene_platform = st.selectbox("Plataforma", options=scene_platform_options, key="scene_platform")
             scene_goal = st.selectbox(
                 "Objetivo de la pieza",
                 ["Captar atención", "Explicar una idea", "Mostrar prueba", "Vender una oferta", "Reforzar autoridad"],
